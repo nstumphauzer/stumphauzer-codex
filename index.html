@@ -45,9 +45,14 @@
   #loader .t{font-family:'Times New Roman',serif;letter-spacing:.4em;font-size:11px;color:#a8e6ff;text-transform:uppercase;}
   .legend{position:fixed;left:18px;top:70px;font-size:10px;line-height:1.8;color:#6fb2cc;z-index:4;pointer-events:none;}
   .legend .sw{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:middle;transform:rotate(45deg);}
+
+  #panel .locimg{margin:6px 0 18px;position:relative;border:1px solid rgba(120,200,240,.25);border-radius:3px;overflow:hidden;line-height:0;}
+  #panel .locimg img{width:100%;height:180px;object-fit:cover;display:block;filter:saturate(.9) brightness(.95);}
+  #panel .locimg .loccap{position:absolute;left:0;right:0;bottom:0;padding:5px 10px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#cfefff;background:linear-gradient(to top,rgba(0,10,20,.9),transparent);}
 </style>
 </head>
 <body>
+<script type="application/json" id="loc-img">{"Amherst, OH": "https://upload.wikimedia.org/wikipedia/commons/7/7a/City_Hall%2C_Amherst%2C_OH_-_52305288549.jpg", "Eger, Hungary": "https://upload.wikimedia.org/wikipedia/commons/2/22/Eger_montage.JPG", "Cleveland, Ohio": "https://upload.wikimedia.org/wikipedia/commons/9/92/Cleveland_skyline_from_Lakewood_Park%2C_January_2026.jpg", "Elyria, Ohio": "https://upload.wikimedia.org/wikipedia/commons/4/49/Broad_west_of_Washington_in_downtown_Elyria.jpg", "Yorkton, Saskatchewan": "https://upload.wikimedia.org/wikipedia/commons/2/2a/YorktonDownTownStreet.JPG", "Som, Bereg County, Hungary": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Som%2C_katolikus_templom.JPG", "Avon, Ohio": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Avon_Ohio_Old_Townhall_26.JPG", "Lorain, Ohio": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Lorain%2C_Ohio_Skyline.jpg", "Aldebrő, Hungary": "https://upload.wikimedia.org/wikipedia/commons/1/17/Aldebro_SzentlelekEljoveteleTemplom2024.2.jpg", "Amherst, Ohio": "https://upload.wikimedia.org/wikipedia/commons/7/7a/City_Hall%2C_Amherst%2C_OH_-_52305288549.jpg", "Goose Bay, Labrador, Canada": "https://upload.wikimedia.org/wikipedia/commons/2/20/Goose_Bay_Labrador_%282513512285%29.jpg", "Budapest, Hungary": "https://upload.wikimedia.org/wikipedia/commons/5/53/View_from_Gell%C3%A9rt_Hill_to_the_Danube%2C_Hungary_-_Budapest_%2828493220635%29.jpg", "Hungary": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Flag_of_Hungary.svg/640px-Flag_of_Hungary.svg.png", "Elyria, OH": "https://upload.wikimedia.org/wikipedia/commons/4/49/Broad_west_of_Washington_in_downtown_Elyria.jpg", "Amhurst, Ohio": "https://upload.wikimedia.org/wikipedia/commons/7/7a/City_Hall%2C_Amherst%2C_OH_-_52305288549.jpg", "Avon, OH": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Avon_Ohio_Old_Townhall_26.JPG", "Lorain, OH": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Lorain%2C_Ohio_Skyline.jpg", "Mohács, Hungary": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Moh%C3%A1cs_l%C3%A9gifot%C3%B3.jpg", "Saskatchewan": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Flag_of_Saskatchewan.svg/640px-Flag_of_Saskatchewan.svg.png", "Heves County": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Heves_megye%2C_B%C3%A9lap%C3%A1tfalva%2C_Gy%C3%A1ri-t%C3%B3_%C3%A9s_B%C3%A9l-k%C5%91.jpg", "Whitewood, Saskatchewan": "https://upload.wikimedia.org/wikipedia/commons/5/56/Main_Street%2C_Whitewood%2C_1913.jpg", "Cleveland, OH": "https://upload.wikimedia.org/wikipedia/commons/9/92/Cleveland_skyline_from_Lakewood_Park%2C_January_2026.jpg", "Wellington, Ohio": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Wellington_TownHall_Dscn1746.jpg", "Onod, Heves Co., Hungary": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Flag_of_Hungary.svg/640px-Flag_of_Hungary.svg.png", "Stockholm, SK": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Flag_of_Saskatchewan.svg/640px-Flag_of_Saskatchewan.svg.png", "Oberlin, Ohio": "https://upload.wikimedia.org/wikipedia/commons/8/83/Oberlin_Ohio.JPG", "Oberlin, OH": "https://upload.wikimedia.org/wikipedia/commons/8/83/Oberlin_Ohio.JPG", "North Ridgeville, OH": "https://upload.wikimedia.org/wikipedia/commons/4/4e/North_Ridgeville_City_Hall_with_water_tower.jpg", "North Ridgeville, Ohio": "https://upload.wikimedia.org/wikipedia/commons/4/4e/North_Ridgeville_City_Hall_with_water_tower.jpg", "Bay Village, OH": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Huntington_Beach_With_Downtown_Cleveland_In_Background.jpg", "Bay Village, Ohio": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Huntington_Beach_With_Downtown_Cleveland_In_Background.jpg", "Westlake, OH": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Westlake_Porter_Public_Library.jpg", "Wellington, OH": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Wellington_TownHall_Dscn1746.jpg", "Westlake, Ohio": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Westlake_Porter_Public_Library.jpg", "Stockholm, Saskatchewan, Canada": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Flag_of_Saskatchewan.svg/640px-Flag_of_Saskatchewan.svg.png", "Sylvania, Ohio": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Main_Street%2C_Downtown_Sylvania%2C_Ohio.jpg", "Toledo, Ohio": "https://upload.wikimedia.org/wikipedia/commons/1/13/Toledo_Museum_of_Art_exterior%2C_Art_Museum_Dr_entrance.jpg", "Ashland, OH": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Ashland_Ohio.jpg", "Ashland, Ohio": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Ashland_Ohio.jpg", "Akron, Ohio": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Stan_Hywet_Hall_2.jpg", "Fairview Park, Ohio": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Fairview_Park_Bain_Cabin.jpg", "Fairview, Ohio": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Fairview_Park_Bain_Cabin.jpg", "Akron, OH": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Stan_Hywet_Hall_2.jpg", "Toledo, OH": "https://upload.wikimedia.org/wikipedia/commons/1/13/Toledo_Museum_of_Art_exterior%2C_Art_Museum_Dr_entrance.jpg", "Sylvania, OH": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Main_Street%2C_Downtown_Sylvania%2C_Ohio.jpg", "Findlay, Ohio": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Pictures_of_FIndlay_042.jpg", "Columbus, Ohio": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Downtown_Columbus_View_from_Main_St_Bridge_-_edit1.jpg", "Bowling Green, Ohio": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Downtown_Bowling_Green%2C_OH_2.jpg", "Columbus, OH": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Downtown_Columbus_View_from_Main_St_Bridge_-_edit1.jpg", "Findlay, OH": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Pictures_of_FIndlay_042.jpg", "Bowling Green, OH": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Downtown_Bowling_Green%2C_OH_2.jpg", "Wooster, OH": "https://upload.wikimedia.org/wikipedia/commons/1/13/Wooster_downtown2.jpg", "Chardon, OH": "https://upload.wikimedia.org/wikipedia/commons/d/db/Geauga_County_Courthouse_P7010530.jpg", "Wooster, Ohio": "https://upload.wikimedia.org/wikipedia/commons/1/13/Wooster_downtown2.jpg", "Chardon, Ohio": "https://upload.wikimedia.org/wikipedia/commons/d/db/Geauga_County_Courthouse_P7010530.jpg", "Napoleon, Ohio": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Henry_County_Courthouse_%E2%80%94_Napoleon%2C_Ohio_%28cropped%29.jpg", "Dayton, Ohio": "https://upload.wikimedia.org/wikipedia/commons/3/32/Dayton_Skyline_-_Sunset_September_2022_%28cropped%29.jpg", "Napolean, Ohio": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Henry_County_Courthouse_%E2%80%94_Napoleon%2C_Ohio_%28cropped%29.jpg", "Leipsic, Ohio": "https://upload.wikimedia.org/wikipedia/commons/b/be/John_Edwards_House_in_Leipsic.jpg", "Trenton, Michigan": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Trenton_City_Hall%2C_MI.jpg/640px-Trenton_City_Hall%2C_MI.jpg", "Parma, Ohio": "https://upload.wikimedia.org/wikipedia/commons/d/da/Parma%2C_OH_-_Cleveland_Skyline_from_State_Rd.png", "Painesville, Ohio": "https://upload.wikimedia.org/wikipedia/commons/8/81/Buildings_on_North_Park_Place%2C_Painesville%2C_Ohio%2C_September_2025.jpg", "Lima, Ohio": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Lima_public_square.jpg", "Milan, Ohio": "https://upload.wikimedia.org/wikipedia/commons/4/41/Milan_Ohio_public_square.jpg", "Sheffield, Ohio": "https://upload.wikimedia.org/wikipedia/commons/b/ba/Jabez_and_Robbins_Burrell_House.jpg", "Painsville, Ohio": "https://upload.wikimedia.org/wikipedia/commons/8/81/Buildings_on_North_Park_Place%2C_Painesville%2C_Ohio%2C_September_2025.jpg", "Worthington, Ohio": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Downtown_Worthington%2C_Ohio.jpg", "Sheffield Township, Ohio": "https://upload.wikimedia.org/wikipedia/commons/0/03/Map_of_Lorain_County_Ohio_Highlighting_Sheffield_Township.png", "Kettering, Ohio": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Frazefountains.jpg", "Ohio": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Flag_of_Ohio.svg/640px-Flag_of_Ohio.svg.png", "Wyandotte, Michigan": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Wyandotte_MI.jpg", "Detroit, MI": "https://upload.wikimedia.org/wikipedia/commons/4/45/Detroit_Skyline_from_Windsor_2025-09-01.jpg", "Detroit, Michigan": "https://upload.wikimedia.org/wikipedia/commons/4/45/Detroit_Skyline_from_Windsor_2025-09-01.jpg", "Wayne, Michigan": "https://upload.wikimedia.org/wikipedia/commons/2/24/Wayne_%28city%29%2C_MI_location.png", "Wayne, MI": "https://upload.wikimedia.org/wikipedia/commons/2/24/Wayne_%28city%29%2C_MI_location.png", "Southfield, Michigan": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Southfield_Town_Center3.jpg", "Livonia, MI": "https://upload.wikimedia.org/wikipedia/commons/7/77/Livonia_City_Hall_%282022%29.jpg", "Monroe, MI": "https://upload.wikimedia.org/wikipedia/commons/8/81/Monroe_from_the_River_Raisin.jpg", "Livonia, Michigan": "https://upload.wikimedia.org/wikipedia/commons/7/77/Livonia_City_Hall_%282022%29.jpg", "Farmington, Michigan": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Downtown_Farmington_MI_%282022%29.jpg", "Monroe, Michigan": "https://upload.wikimedia.org/wikipedia/commons/8/81/Monroe_from_the_River_Raisin.jpg", "Southfield, MI": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Southfield_Town_Center3.jpg", "Stevenson, Michigan": "https://upload.wikimedia.org/wikipedia/commons/5/57/StephensonMichiganDowntown1US41.jpg", "College Park, Maryland": "https://upload.wikimedia.org/wikipedia/commons/8/8d/City_Hall_College_Park_MD.jpg", "Washington, DC": "https://upload.wikimedia.org/wikipedia/commons/e/e4/12-07-13-washington-by-RalfR-08.jpg", "Beverly, MA": "https://upload.wikimedia.org/wikipedia/commons/5/58/Beverly_Main_Post_Office%2C_Beverly%2C_MA.jpg", "Daytona Beach, Florida": "https://upload.wikimedia.org/wikipedia/commons/d/de/DaytonaBeach_Collage-2009-26-04.png", "Beverly, Massachusetts": "https://upload.wikimedia.org/wikipedia/commons/5/58/Beverly_Main_Post_Office%2C_Beverly%2C_MA.jpg", "Boston, MA": "https://upload.wikimedia.org/wikipedia/commons/9/96/ISH_WC_Boston4.jpg", "Silver Spring, MD": "https://upload.wikimedia.org/wikipedia/commons/4/48/Silver_Spring_Montage.jpg", "Silver Spring, Maryland": "https://upload.wikimedia.org/wikipedia/commons/4/48/Silver_Spring_Montage.jpg", "Elba, Alabama": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Coffee_County_Courthouse.jpg", "Boston, Massachusetts": "https://upload.wikimedia.org/wikipedia/commons/9/96/ISH_WC_Boston4.jpg", "Homewood, Alabama": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Samford_University.jpg", "Daytona Beach, FL": "https://upload.wikimedia.org/wikipedia/commons/d/de/DaytonaBeach_Collage-2009-26-04.png", "Orlando, Florida": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Lake-eola-park-orlando-florida.jpg", "Orlando, FL": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Lake-eola-park-orlando-florida.jpg", "Port Orange, Florida": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Port_Orange_FL_city_hall02.jpg", "Port Orange, FL": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Port_Orange_FL_city_hall02.jpg", "Clintwood, Virginia": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Clintwood-from-McClure-va.jpg", "Bradenton, Florida": "https://upload.wikimedia.org/wikipedia/commons/4/42/Bradenton_City_Hall.jpg", "Venice, FL": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Venice%2C_FL_Beachfront.jpg/640px-Venice%2C_FL_Beachfront.jpg", "Venice, Florida": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Venice%2C_FL_Beachfront.jpg/640px-Venice%2C_FL_Beachfront.jpg", "Indianapolis, IN": "https://upload.wikimedia.org/wikipedia/commons/9/95/Indianapolis-1872528.jpg", "Madison, Wisconsin": "https://upload.wikimedia.org/wikipedia/commons/6/69/Aerial_View_of_Campus%2C_with_Helen_C._White_Hall_in_foreground_%2814070186173%29.jpg", "Florida": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Flag_of_Florida.svg/640px-Flag_of_Florida.svg.png", "Farmville, Virginia": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Farmville%2C_Virginia%2C_June_2017.jpg", "Crossville, Tennessee": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Crossville-Main-Street-tn1.jpg", "Madison, WI": "https://upload.wikimedia.org/wikipedia/commons/6/69/Aerial_View_of_Campus%2C_with_Helen_C._White_Hall_in_foreground_%2814070186173%29.jpg", "Joplin, Missouri": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Joplin_Downtown_Historic_District.jpg", "Melrose Park, Illinois": "https://upload.wikimedia.org/wikipedia/commons/3/37/Downtown_Melrose_Park.jpg", "Dallas, Texas": "https://upload.wikimedia.org/wikipedia/commons/0/03/View_of_Dallas_from_Reunion_Tower_August_2015_05.jpg", "Indianapolis, Indiana": "https://upload.wikimedia.org/wikipedia/commons/9/95/Indianapolis-1872528.jpg", "Fort Wayne, Indiana": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Historic_Fort_Wayne%2C_Fort_Wayne%2C_Indiana%2C_May_2014.jpg", "Baytown, Texas": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Fred_Hartman_Bridge%2C_Baytown%2C_Texas_1209261519.jpg", "Houston, Texas": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Texas_medical_center.jpg", "Rome, New York": "https://upload.wikimedia.org/wikipedia/commons/6/6a/OneidaCoCourthouse-Beale.jpg", "Troy, Indiana": "https://upload.wikimedia.org/wikipedia/commons/9/97/Nester_House_in_Troy.jpg", "San Angelo, Texas": "https://upload.wikimedia.org/wikipedia/commons/d/d5/San_Angelo_September_2019_03_%28San_Angelo_City_Hall%29.jpg", "Rockford, Illinois": "https://upload.wikimedia.org/wikipedia/commons/c/c2/East_State_Street_in_downtown_Rockford.jpg", "Knob Noster, Missouri": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Johnson_County_Missouri_Incorporated_and_Unincorporated_areas_Knob_Noster_Highlighted.svg/640px-Johnson_County_Missouri_Incorporated_and_Unincorporated_areas_Knob_Noster_Highlighted.svg.png", "Plattsburg, New York": "https://upload.wikimedia.org/wikipedia/commons/e/e2/Plattsburgh%2C_New_York.jpg", "Plattsburgh, New York": "https://upload.wikimedia.org/wikipedia/commons/e/e2/Plattsburgh%2C_New_York.jpg", "Westfield, New York": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Barcelona_New_York_aerial_view.jpg", "Weirton, West Virginia": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Looking_south_down_Main_Street_in_downtown_Weirton%2C_West_Virginia%2C_05-25-2025.jpg", "Manchester, Connecticut": "https://upload.wikimedia.org/wikipedia/commons/b/ba/Manchester%2C_Connecticut_town_hall.jpg", "Buffalo, New York": "https://upload.wikimedia.org/wikipedia/commons/c/c5/KeyBank_Center_side_view_from_Main_Street_at_Prime_Street%2C_Buffalo%2C_New_York_-_20210725.jpg", "South Windsor, Connecticut": "https://upload.wikimedia.org/wikipedia/commons/9/96/FormerMemorialLibrarySouthWindsorCT.jpg", "Denver, Colorado": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Denver%2C_Colorado_skyline_%28cropped%29.jpg", "Hayes-Pittsburgh, Pennsylvania": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Ascending_the_Duquesne_Incline.jpg/640px-Ascending_the_Duquesne_Incline.jpg", "Pennington, New Jersey": "https://upload.wikimedia.org/wikipedia/commons/3/34/Mainanddelaware.JPG", "Orange, California": "https://upload.wikimedia.org/wikipedia/commons/7/74/Starbucks_at_Wells_Fargo_building%2C_Plaza%2C_101_E._Chapman_Ave.%2C_Orange%2C_California.jpg", "Berryburg, West Virginia": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Flag_of_West_Virginia.svg/640px-Flag_of_West_Virginia.svg.png", "Williamsport, Pennsylvania": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Downtown-Williamsport.jpg", "Uniontown, Pennsylvania": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Uniontown%2C_Pennsylvania_%282023%29.jpg", "West Virginia": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Flag_of_West_Virginia.svg/640px-Flag_of_West_Virginia.svg.png", "Union Town, Pennsylvania": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Uniontown%2C_Pennsylvania_%282023%29.jpg", "Glenville, West Virginia": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Glenville_West_Virginia.JPG", "Templeton, California": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Templeton_Park.JPG", "Merced, California": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Tioga_Hotel_-_Merced_California_%28cropped%29.jpg", "Follansbee, West Virginia": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Commercial_block_in_Follansbee%2C_West_Virginia_LCCN2015631977.jpg", "Floyd County, Kentucky": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Floyd_County_Courthouse_%28new%29%2C_Prestonsburg.jpg", "Huntington, West Virginia": "https://upload.wikimedia.org/wikipedia/commons/7/79/Huntington%2C_West_Virginia_%282023%29.jpg", "Utica, New York": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Stanley_facade.jpg"}</script>
 <div id="loader"><div class="t">Initializing Codex</div><div class="bar"></div></div>
 
 <div id="hud">
@@ -727,6 +732,67 @@ const crystalGroup = new THREE.Group();
 scene.add(crystalGroup);
 const pickables = [];
 
+
+// ---------- Location → image resolution + texture cache ----------
+const LOC_IMG = JSON.parse(document.getElementById('loc-img').textContent);
+
+function extractLoc(s) {
+  if (!s) return null;
+  // Prefer the text after the 4-digit year token. Handles "5 Jul 1883, Aldebrő, Hungary",
+  // "c.1882 Hungary", "May/Jun 1954, Wayne, MI" — and strips any trailing ", age 72" parenthetical noise.
+  let m = s.match(/\b(\d{4})\b[,\s]+(.+)$/);
+  if (!m) return null;
+  let tail = m[2].trim();
+  // strip trailing ", age …" / ", buried …" / parenthetical residue
+  tail = tail.replace(/,\s*(age|buried|stillborn)\b.*$/i, '').replace(/\s*\(.+?\)\s*$/, '').trim();
+  return tail || null;
+}
+
+function resolveLoc(raw) {
+  if (!raw) return null;
+  const key = raw.trim();
+  if (LOC_IMG[key]) return { key, url: LOC_IMG[key] };
+  // progressive suffix match — "Amherst Manor Nursing Center, Amherst, Ohio" → "Amherst, Ohio"
+  const parts = key.split(',').map(s => s.trim()).filter(Boolean);
+  for (let i = 1; i < parts.length; i++) {
+    const candidate = parts.slice(i).join(', ');
+    if (LOC_IMG[candidate]) return { key: candidate, url: LOC_IMG[candidate] };
+  }
+  // try the first segment alone as a standalone key ("Saskatchewan")
+  for (const p of parts) if (LOC_IMG[p]) return { key: p, url: LOC_IMG[p] };
+  return null;
+}
+
+const textureCache = {};
+function getLocationTexture(url, onReady) {
+  const cached = textureCache[url];
+  if (cached && cached.tex) { onReady(cached.tex); return; }
+  if (cached && cached.queue) { cached.queue.push(onReady); return; }
+  const entry = { queue: [onReady] };
+  textureCache[url] = entry;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    const target = Math.min(side, 384);
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = target;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img,
+      (img.naturalWidth  - side) / 2,
+      (img.naturalHeight - side) / 2,
+      side, side, 0, 0, target, target);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    entry.tex = tex;
+    for (const cb of entry.queue) cb(tex);
+    entry.queue = null;
+  };
+  img.onerror = () => { entry.tex = null; for (const cb of entry.queue) cb(null); entry.queue = null; };
+  img.src = url;
+}
+
 function crystalMaterial(color, emissive, opacity) {
   return new THREE.MeshPhongMaterial({
     color, emissive, emissiveIntensity:1.0,
@@ -737,37 +803,75 @@ function crystalMaterial(color, emissive, opacity) {
 }
 
 function makeCrystal(person) {
-  let color, emissive, size;
+  // Colour & size family first
+  let frameColor, size;
   if (person.s) {
-    // Spouse / in-law
-    color = 0xa8a8c0; emissive = 0x555580; size = 1.8;
+    frameColor = 0x6666aa; size = 3.2;
   } else if (person.g <= 4) {
-    // Direct ancestor — warm gold crystal
-    color = 0xffd27a; emissive = 0xff8a20; size = 4.5 - person.g * 0.4;
+    frameColor = 0xffaa55; size = person.g === 1 ? 9 : 7.2 - person.g * 0.4;
   } else {
-    // Descendant — cyan crystal
-    color = 0x88e0ff; emissive = 0x2a7ba8; size = 2.6;
+    frameColor = 0x4fc8f0; size = 4.2;
   }
-  if (person.g === 1) size = 6;
 
-  const geo = new THREE.OctahedronGeometry(size, 0);
+  // Try to resolve a location for this person
+  const locRaw = person.loc || extractLoc(person.b) || extractLoc(person.d);
+  const resolved = resolveLoc(locRaw);
+  person._locRaw  = locRaw;
+  person._locKey  = resolved ? resolved.key : null;
+  person._locUrl  = resolved ? resolved.url : null;
+
+  if (resolved) {
+    // 1x1 photo-billboard of the person's location
+    const photoSize = size * 1.9;
+    const mat = new THREE.SpriteMaterial({ color:0xffffff, transparent:true, depthWrite:true });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(photoSize, photoSize, 1);
+    sprite.position.copy(person.pos);
+    sprite.userData = { kind:'person', ref:person, baseScale:photoSize };
+
+    // Glow frame behind the photo (slightly larger, additive)
+    const frameMat = new THREE.SpriteMaterial({
+      color: frameColor, transparent:true, opacity:0.55,
+      blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    const frame = new THREE.Sprite(frameMat);
+    frame.scale.set(photoSize * 1.25, photoSize * 1.25, 1);
+    frame.position.copy(person.pos);
+    frame.userData = { isFrame:true, baseScale:photoSize * 1.25 };
+
+    crystalGroup.add(frame);
+    crystalGroup.add(sprite);
+    pickables.push(sprite);
+    sprite.userData.frame = frame;
+    person._mesh = sprite;
+
+    sprite.userData.bobPhase = Math.random() * Math.PI * 2;
+    sprite.userData.baseY = person.pos.y;
+    frame.userData.bobPhase = sprite.userData.bobPhase;
+    frame.userData.baseY    = person.pos.y;
+
+    getLocationTexture(resolved.url, (tex) => {
+      if (tex) { mat.map = tex; mat.needsUpdate = true; }
+    });
+    return sprite;
+  }
+
+  // Fallback: crystal octahedron
+  const color = person.s ? 0xa8a8c0 : (person.g <= 4 ? 0xffd27a : 0x88e0ff);
+  const emissive = person.s ? 0x555580 : (person.g <= 4 ? 0xff8a20 : 0x2a7ba8);
+  const xsize = person.s ? 1.8 : (person.g <= 4 ? (4.5 - person.g * 0.4) : 2.6);
+  const geo = new THREE.OctahedronGeometry(xsize, 0);
   const mesh = new THREE.Mesh(geo, crystalMaterial(color, emissive));
   mesh.position.copy(person.pos);
   mesh.userData = { kind:'person', ref:person };
-
-  // Inner glow — smaller scaled octahedron with additive material
-  const glowGeo = new THREE.OctahedronGeometry(size*1.6, 0);
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: person.s ? 0x6666aa : (person.g <= 4 ? 0xffaa55 : 0x4fc8f0),
-    transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false
-  });
-  const glow = new THREE.Mesh(glowGeo, glowMat);
+  const glow = new THREE.Mesh(
+    new THREE.OctahedronGeometry(xsize * 1.6, 0),
+    new THREE.MeshBasicMaterial({ color: frameColor, transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false })
+  );
   mesh.add(glow);
-
-  mesh.userData.spinRate = (Math.random()-0.5) * 0.4 + 0.3;
-  mesh.userData.bobPhase = Math.random()*Math.PI*2;
+  mesh.userData.spinRate = (Math.random() - 0.5) * 0.4 + 0.3;
+  mesh.userData.bobPhase = Math.random() * Math.PI * 2;
   mesh.userData.baseY = person.pos.y;
-
   crystalGroup.add(mesh);
   pickables.push(mesh);
   person._mesh = mesh;
@@ -898,6 +1002,9 @@ function showPerson(person) {
 
   let html = `<div class="gen">Generation ${person.g}${person.s ? ' · Spouse' : ''}</div>`;
   html += `<h2>${person.n}</h2>`;
+  if (person._locUrl) {
+    html += `<div class="locimg" title="${person._locKey}"><img src="${person._locUrl}" alt="${person._locKey}"><div class="loccap">${person._locKey}</div></div>`;
+  }
   if (person.aka) html += `<div class="row"><div class="k">Also</div><div class="v">${person.aka}</div></div>`;
   if (person.b)   html += `<div class="row"><div class="k">Born</div><div class="v">${person.b}</div></div>`;
   if (person.d)   html += `<div class="row"><div class="k">Died</div><div class="v">${person.d}</div></div>`;
@@ -1025,17 +1132,51 @@ function animate() {
   raycaster.setFromCamera(mouse, camera);
   const hits = raycaster.intersectObjects(pickables, false);
   const h = hits.length > 0 ? hits[0].object : null;
-  if (hovered && hovered !== h) { hovered.material.emissiveIntensity = 1.0; hovered.scale.setScalar(1); }
-  if (h) { h.material.emissiveIntensity = 2.5; h.scale.setScalar(1.35); document.body.style.cursor = 'pointer'; }
+  const restore = (obj) => {
+    if (!obj) return;
+    if (obj.isSprite) {
+      const s = obj.userData.baseScale || 1;
+      obj.scale.set(s, s, 1);
+      if (obj.userData.frame) {
+        const fs = obj.userData.frame.userData.baseScale || s * 1.25;
+        obj.userData.frame.scale.set(fs, fs, 1);
+        obj.userData.frame.material.opacity = 0.55;
+      }
+    } else {
+      if (obj.material && 'emissiveIntensity' in obj.material) obj.material.emissiveIntensity = 1.0;
+      obj.scale.setScalar(1);
+    }
+  };
+  const boost = (obj) => {
+    if (!obj) return;
+    if (obj.isSprite) {
+      const s = (obj.userData.baseScale || 1) * 1.35;
+      obj.scale.set(s, s, 1);
+      if (obj.userData.frame) {
+        const fs = (obj.userData.frame.userData.baseScale || s) * 1.35;
+        obj.userData.frame.scale.set(fs, fs, 1);
+        obj.userData.frame.material.opacity = 0.9;
+      }
+    } else {
+      if (obj.material && 'emissiveIntensity' in obj.material) obj.material.emissiveIntensity = 2.5;
+      obj.scale.setScalar(1.35);
+    }
+  };
+  if (hovered && hovered !== h) restore(hovered);
+  if (h) { boost(h); document.body.style.cursor = 'pointer'; }
   else { document.body.style.cursor = ''; }
   hovered = h;
 
-  // Gentle rotation & bobbing of crystals
+  // Gentle rotation (crystals only) & bobbing of all nodes + photo frames
   for (const c of pickables) {
-    c.rotation.y += 0.003 * (c.userData.spinRate || 0.3);
-    c.rotation.x += 0.0015;
+    if (!c.isSprite) {
+      c.rotation.y += 0.003 * (c.userData.spinRate || 0.3);
+      c.rotation.x += 0.0015;
+    }
     if (c.userData.baseY !== undefined) {
-      c.position.y = c.userData.baseY + Math.sin(t * 0.6 + c.userData.bobPhase) * 0.6;
+      const y = c.userData.baseY + Math.sin(t * 0.6 + c.userData.bobPhase) * 0.6;
+      c.position.y = y;
+      if (c.isSprite && c.userData.frame) c.userData.frame.position.y = y;
     }
   }
 
