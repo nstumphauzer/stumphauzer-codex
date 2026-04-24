@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Stumphauzer Codex — 1823–2014</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#000;color:#cfefff;font-family:'Helvetica Neue',system-ui,sans-serif;overflow:hidden;}
+  canvas{display:block;}
+  #hud{position:fixed;left:0;right:0;top:0;padding:14px 18px;pointer-events:none;z-index:5;}
+  #title{font-family:'Times New Roman',serif;font-weight:300;letter-spacing:.35em;font-size:14px;color:#a8e6ff;text-transform:uppercase;}
+  #subtitle{font-family:'Times New Roman',serif;font-style:italic;font-size:11px;color:#6fb2cc;letter-spacing:.1em;margin-top:4px;}
+  #help{position:fixed;left:18px;bottom:18px;font-size:11px;line-height:1.6;color:#6fb2cc;z-index:5;pointer-events:none;max-width:240px;}
+  #help kbd{background:rgba(90,180,220,.15);border:1px solid rgba(120,200,240,.3);padding:1px 5px;border-radius:3px;color:#a8e6ff;font-family:ui-monospace,monospace;font-size:10px;}
+  #index{position:fixed;right:0;top:0;bottom:0;width:260px;background:linear-gradient(to left,rgba(0,10,20,.92),rgba(0,10,20,.6) 80%,transparent);padding:60px 18px 20px;overflow:auto;z-index:4;pointer-events:auto;transition:transform .4s ease;}
+  #index.hidden{transform:translateX(100%);}
+  #index h3{font-size:10px;font-weight:400;letter-spacing:.3em;color:#a8e6ff;text-transform:uppercase;margin:16px 0 8px;border-bottom:1px solid rgba(120,200,240,.2);padding-bottom:4px;}
+  #index a{display:block;color:#cfefff;font-size:12px;padding:3px 0;text-decoration:none;cursor:pointer;opacity:.75;transition:opacity .15s,color .15s,padding-left .15s;}
+  #index a:hover{opacity:1;color:#fff;padding-left:4px;}
+  #index a.narrative{color:#ffcb70;}
+  #toggle-index{position:fixed;right:18px;top:14px;z-index:6;background:rgba(0,10,20,.6);border:1px solid rgba(120,200,240,.3);color:#a8e6ff;padding:6px 10px;font-size:10px;letter-spacing:.2em;cursor:pointer;border-radius:2px;text-transform:uppercase;}
+  #toggle-index:hover{background:rgba(30,70,100,.7);}
+  #panel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);background:rgba(4,14,24,.94);border:1px solid rgba(120,200,240,.35);box-shadow:0 0 60px rgba(80,180,240,.25),inset 0 0 30px rgba(40,120,180,.1);padding:30px 34px;max-width:540px;max-height:70vh;overflow:auto;z-index:10;display:none;backdrop-filter:blur(8px);opacity:0;transition:opacity .25s,transform .25s;border-radius:3px;}
+  #panel.visible{display:block;opacity:1;transform:translate(-50%,-50%) scale(1);}
+  #panel h2{font-family:'Times New Roman',serif;font-weight:300;color:#fff;margin:0 0 4px;font-size:22px;letter-spacing:.02em;}
+  #panel .gen{font-size:10px;letter-spacing:.3em;color:#7fc4e6;text-transform:uppercase;margin-bottom:14px;}
+  #panel .row{display:flex;gap:10px;margin:4px 0;font-size:13px;line-height:1.5;}
+  #panel .row .k{color:#7fc4e6;min-width:70px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;padding-top:2px;}
+  #panel .row .v{color:#e8f7ff;flex:1;}
+  #panel .note{margin-top:16px;padding-top:14px;border-top:1px solid rgba(120,200,240,.2);font-size:13px;line-height:1.65;color:#c0e0f0;font-style:italic;}
+  #panel .narr{font-size:13px;line-height:1.8;color:#e0f0fb;white-space:pre-wrap;}
+  #close{position:absolute;top:10px;right:14px;background:none;border:none;color:#7fc4e6;font-size:22px;cursor:pointer;line-height:1;}
+  #close:hover{color:#fff;}
+  #panel .lineage{margin-top:14px;font-size:11px;color:#7fc4e6;letter-spacing:.05em;}
+  #panel .lineage span{color:#e8f7ff;}
+  #panel .children{margin-top:14px;padding-top:10px;border-top:1px solid rgba(120,200,240,.15);}
+  #panel .children .clabel{font-size:10px;letter-spacing:.3em;color:#7fc4e6;text-transform:uppercase;margin-bottom:6px;}
+  #panel .children a{display:inline-block;font-size:12px;color:#cfefff;margin-right:12px;margin-bottom:4px;text-decoration:none;cursor:pointer;border-bottom:1px dotted rgba(120,200,240,.3);padding-bottom:1px;}
+  #panel .children a:hover{color:#fff;border-bottom-color:#fff;}
+  #loader{position:fixed;inset:0;background:#000;z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .6s;}
+  #loader.done{opacity:0;pointer-events:none;}
+  #loader .bar{width:240px;height:1px;background:rgba(120,200,240,.2);position:relative;margin-top:18px;overflow:hidden;}
+  #loader .bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,#a8e6ff,transparent);animation:scan 1.4s linear infinite;}
+  @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+  #loader .t{font-family:'Times New Roman',serif;letter-spacing:.4em;font-size:11px;color:#a8e6ff;text-transform:uppercase;}
+  .legend{position:fixed;left:18px;top:70px;font-size:10px;line-height:1.8;color:#6fb2cc;z-index:4;pointer-events:none;}
+  .legend .sw{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:middle;transform:rotate(45deg);}
+</style>
+</head>
+<body>
+<div id="loader"><div class="t">Initializing Codex</div><div class="bar"></div></div>
+
+<div id="hud">
+  <div id="title">The Stumphauzer Codex</div>
+  <div id="subtitle">Aldebrő · Stockholm · Avon &nbsp;—&nbsp; 1823 – 2014</div>
+</div>
+
+<div class="legend">
+  <div><span class="sw" style="background:#ffcb70;box-shadow:0 0 8px #ffcb70"></span> Narrative monolith</div>
+  <div><span class="sw" style="background:#ffd27a;box-shadow:0 0 8px #ffaa40"></span> Direct ancestor (gen 1–4)</div>
+  <div><span class="sw" style="background:#88e0ff;box-shadow:0 0 8px #5fb8d8"></span> Stumphauzer descendant</div>
+  <div><span class="sw" style="background:#a8a8c0;box-shadow:0 0 6px #8888a0"></span> Spouse / in-law line</div>
+</div>
+
+<button id="toggle-index">Index</button>
+<div id="index"></div>
+
+<div id="panel"><button id="close">×</button><div id="panel-body"></div></div>
+
+<div id="help">
+  <div><kbd>Drag</kbd> orbit &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom</div>
+  <div><kbd>Right-drag</kbd> pan &nbsp;·&nbsp; <kbd>Click</kbd> a crystal</div>
+  <div><kbd>Esc</kbd> reset view &nbsp;·&nbsp; <kbd>H</kbd> toggle index</div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ============================================================
+// DATA — transcribed from "History of the Stumphauzer Family"
+// (Christine R. Hampshire, 1981; updated 1/25/2017)
+// Generations are encoded in `g` (1 = Michaeleus, the Hungarian root).
+// `p` = parent id.  `s` = true if the person is a spouse married in.
+// ============================================================
+
+const P = [
+  // --- Direct bloodline (Aldebrő parish, Heves County, Hungary) ---
+  {id:'mich1', n:'Michaeleus Stumphaursi', aka:'Mihály · Michael', g:1, p:null, m:'Marie Steckelbach, 11 Feb 1805', loc:'Aldebrő, Hungary', note:'"First" volume of Aldebrő parish marriage records, p.18. Archaic German combined form for woodpeddler: Stumpfhausierer — pronounced shtoompf-how-ze-er.'},
+  {id:'marie1', n:'Marie Steckelbach', aka:'Aña Mária · Mária Steklpach', g:1, p:'mich1', s:true},
+
+  {id:'joan2', n:'Joannes Stumphaizer', aka:'János · John', g:2, p:'mich1', b:'22 Apr 1823, Aldebrő', m:'Rózsi Márton, 12 Feb 1844', note:'Baptized Joannes (German for John); married as János (Hungarian). Magyarization of the line begins.'},
+  {id:'rozsi2', n:'Rózsi Márton', aka:'Rosalia', g:2, p:'joan2', s:true, b:'c.1826'},
+
+  {id:'matt3', n:'Matthias Stumphauser', aka:'Mátyás · Matthew', g:3, p:'joan2', b:'6 Jan 1854, Aldebrő', m:'Katalin Schönperger, 13 Nov 1876'},
+  {id:'katalin3', n:'Katalin Schönperger', aka:'Catherine', g:3, p:'matt3', s:true, b:'1 May 1862', note:'Daughter of György Schönperger and Julianna Márton.'},
+
+  // Children of Matthias (gen 4)
+  {id:'stephen4', n:'István Stumphauser', aka:'Stephen · Steve', g:4, p:'matt3', b:'5 Jul 1883, Aldebrő', d:'28 Aug 1970, Avon, Ohio', m:'Mary Schaufert, 9 Feb 1903, Aldebrő', note:'Emigrated to Stockholm, Saskatchewan in 1903 on a cattle boat (Mary was constantly ill). Homesteaded north of the settlement. Moved family to Avon, Ohio in November 1916.'},
+  {id:'matthew4', n:'Matthew (Mátyás) Stumphauzer', g:4, p:'matt3', b:'1884, Aldebrő', d:'1912, Aldebrő', m:'Elizabeth Jakly', note:'Emigrated to Stockholm, Saskatchewan in 1905 as "Matthias Stumphauser". Returned to Hungary.'},
+  {id:'geza4', n:'Geza Stumphauzer I', g:4, p:'matt3', m:'Maria Kurczveil', note:'Hungarian branch — remained in Hungary.'},
+  {id:'franci4', n:'Franci Stumphauser', g:4, p:'matt3'},
+  {id:'rozal4', n:'Rozal Stumphauser', g:4, p:'matt3'},
+  {id:'lizzie4', n:'Lizzie Stumphauser', g:4, p:'matt3'},
+  {id:'juliska4', n:'Juliska Stumphauser', g:4, p:'matt3'},
+  {id:'anna4', n:'Anna Stumphauser', g:4, p:'matt3'},
+
+  // Saufert line (maternal — Stephen's wife)
+  {id:'mary_sch', n:'Mary Schaufert', aka:'Maria Saufert', g:4, p:'stephen4', s:true, b:'6 May 1888, Aldebrő, Hungary', d:'15 Jul 1920, Avon, Ohio', note:'Daughter of Mihály Saufert (b.1850) and Erzsébet Hugh (b.1853). Saufert spelt Schaufert in Canada.'},
+
+  // ========== Children of Stephen & Mary (gen 5) — all born Stockholm, Saskatchewan ==========
+  {id:'eliz5', n:'Elizabeth Stumphauzer', aka:'Erzsebet · Alice', g:5, p:'stephen4', b:'13 Mar 1904, Stockholm, SK', d:'8 Jan 1948, Lorain, OH', m:'George Puskas, 7 Feb 1921, St. Ladislaus Church, Lorain'},
+  {id:'mary5', n:'Mary Ann Stumphauzer', g:5, p:'stephen4', b:'23 Nov 1905', d:'11 Apr 1995, Amherst, OH', m:'William Aloysius Papay, 15 Nov 1921, Avon, OH'},
+  {id:'stephenjr5', n:'Stephen Stumphauzer, Jr.', aka:'Istvan', g:5, p:'stephen4', b:'16 Aug 1907, Saskatchewan', d:'30 Mar 1997, North Ridgeville, OH', m:'Elizabeth Kochis, 28 Aug 1928'},
+  {id:'helen5', n:'Helen Stumphauzer', aka:'Ilon', g:5, p:'stephen4', b:'13 Aug 1909', d:'17 Mar 1948, Lorain, OH', m:'Julius Pandy, 11 Jun 1929'},
+  {id:'joseph5', n:'Joseph Victor Stumphauzer', aka:'Jozsef', g:5, p:'stephen4', b:'28 Oct 1911', m:'Yolanda Chaszar'},
+  {id:'john5', n:'John Stumphauzer', aka:'Janos', g:5, p:'stephen4', b:'18 Nov 1912', d:'23 Jan 1961, Elyria, OH', m:'Emma Nagy, 10 Nov 1934, Hungarian Reform Church, Elyria', note:'Breech birth — Mary noted in Hungarian that he "stepped out backwards." The one time they needed a doctor.'},
+  {id:'william5', n:'William Adelbert Stumphauzer', aka:'Bela', g:5, p:'stephen4', b:'18 Aug 1915', d:'15 Feb 1980, Venice, FL', m:'Kathryn Veronica Horvath, 1 Oct 1938, Lorain, OH'},
+  {id:'frank5', n:'Frank William Stumphauzer', aka:'Ferenc Vilmos', g:5, p:'stephen4', b:'2 Nov 1916, Stockholm, SK', m:'Goldie Kocsis, 26 Apr 1938, St. Ladislaus Church, Lorain', note:'Born two weeks before the family made the two-day train trip from Saskatchewan to Avon, Ohio with eight children and two trunks of smoked meat (the meat never arrived).'},
+
+  // Stephen's 2nd & 3rd wives (after Mary's 1920 death)
+  {id:'victoria', n:'Victoria Schaufert', aka:'Saufert', g:4, p:'stephen4', s:true, b:'c.1882 Hungary', d:'May/Jun 1954, Wayne, MI', note:'Married Stephen 27 May 1921, Lorain, OH. Divorced Dec 1922. Victoria was Mary\'s first cousin.'},
+  {id:'irene5', n:'Irene M. Stumphauzer', g:5, p:'stephen4', b:'19 Oct 1921, Avon, OH', d:'8 Feb 1966, Livonia, MI', m:'Eugene Frank Andreozzi, 11 May 1946, Detroit', note:'Daughter of Stephen\'s second marriage.'},
+  {id:'roza', n:'Roza Fekete', g:4, p:'stephen4', s:true, b:'10 Dec 1889, Onod, Heves Co., Hungary', d:'2 Feb 1968, Avon, OH', note:'Daughter of Carl Fekete and Elizabeth Lovash. Married Stephen 1 Nov 1923, Elyria, OH.'},
+  {id:'jesse5', n:'Jesse Matthew Stumphauzer', g:5, p:'stephen4', b:'17 Oct 1925, Lorain, OH', m:'June Marie Bender, 16 Apr 1949, North Ridgeville, OH'},
+  {id:'margaret5', n:'Margaret Rose Stumphauzer', g:5, p:'stephen4', b:'17 Oct 1925, Lorain, OH', m:'Donald Ray Cook, 12 Jul 1947, St. Mary\'s Rectory, Avon, OH'},
+
+  // ========== Gen 6 — Elizabeth × George Puskas ==========
+  {id:'puskas_will', n:'William Puskas', g:6, p:'eliz5', b:'18 Jan 1922, Stevenson, MI', m:'Evelyn Norris, 16 Jul 1941, Avon, OH'},
+  {id:'puskas_marg', n:'Margaret Elizabeth Puskas', g:6, p:'eliz5', b:'9 Mar 1924, Lorain, OH'},
+  {id:'puskas_viola', n:'Viola Helen Puskas', g:6, p:'eliz5', b:'12 May 1927, Lorain, OH', m:'Alex Vanche, 26 Apr 1946, Napoleon, OH'},
+  {id:'puskas_mary', n:'Mary Louise Puskas', g:6, p:'eliz5', b:'20 Jun 1931, Lorain, OH', m:'William Ellison, 15 Apr 1960, Lorain'},
+  {id:'puskas_geo', n:'George Richard Puskas', g:6, p:'eliz5', b:'21 Jan 1934, Lorain, OH', m:'Mary Huff, 25 Nov 1950, Wellington, OH'},
+  {id:'puskas_dol', n:'Dolores Alice Puskas', g:6, p:'eliz5', b:'5 Feb 1938, Lorain, OH', m:'Charles Yonkings, 5 Jun 1955, Lorain'},
+
+  // Gen 7 — William Puskas × Evelyn Norris
+  {id:'ken_pusk', n:'Kenneth William Puskas', g:7, p:'puskas_will', b:'27 Jan 1955, Elyria, OH', m:'Donna Pauline Williams, 27 Dec 1974, Church of Christ, Elyria'},
+  {id:'mel_pusk', n:'Melissa Kay Puskas', g:7, p:'puskas_will', b:'14 Oct 1958, Cleveland, OH', m:'Thomas Crozier'},
+  // Gen 8
+  {id:'kaene_p', n:'Kaene Hartley Puskas', g:8, p:'ken_pusk', b:'2 Jun 1976, Elyria, OH'},
+  {id:'kathryn_p', n:'Kathryn Joy Puskas', g:8, p:'ken_pusk', b:'10 Nov 1978, Elyria, OH'},
+  {id:'eliz_p', n:'Elizabeth A. Puskas', g:8, p:'ken_pusk', b:'1983'},
+  {id:'steph_p', n:'Stephanie C. Puskas', g:8, p:'ken_pusk', b:'1985'},
+  {id:'kenII_p', n:'Kenneth W. Puskas II', g:8, p:'ken_pusk', b:'1987'},
+
+  // Margaret Puskas × King then Bowers
+  {id:'gary_king', n:'Gary King', g:7, p:'puskas_marg', b:'14 Jul 1947, Lorain, OH', m:'Mary Jo Delzeith, 6 Nov 1965, Monroe, MI'},
+  {id:'scott_king', n:'Scott Allen King', g:8, p:'gary_king', b:'27 Dec 1964, Lorain, OH'},
+  {id:'tracy_king', n:'Tracy Lynn King', g:8, p:'gary_king', b:'17 Feb 1972, Amherst, OH'},
+
+  // Viola × Alex Vanche
+  {id:'kath_v', n:'Kathleen Viola Vanche', g:7, p:'puskas_viola', b:'5 May 1947, Lorain, OH', m:'Nick Aulisio, 22 Apr 1967, St. Johns, Lorain'},
+  {id:'peggy_v', n:'Peggy Ann Vanche', g:7, p:'puskas_viola', b:'8 Aug 1948, Lorain, OH', m:'Larry Futrall then Alan C. Foster'},
+  {id:'alice_v', n:'Alice Elizabeth Vanche', g:7, p:'puskas_viola', b:'24 Sep 1952, Lorain, OH', m:'Terrence Phillip Evans, 23 Apr 1977'},
+  {id:'alex_v3', n:'Alex Vanche III', g:7, p:'puskas_viola', b:'27 Jul 1958, Lorain, OH', m:'Sheri Hienrick'},
+  {id:'beth_v', n:'Beth Ann Vanche', g:7, p:'puskas_viola', b:'10 Feb 1967, Lorain, OH'},
+
+  {id:'anth_a', n:'Anthony Todd Aulisio', g:8, p:'kath_v', b:'22 Apr 1968, Lorain, OH'},
+  {id:'nick_a', n:'Nicholas Brian Aulisio', g:8, p:'kath_v', b:'3 Oct 1969, Elyria, OH'},
+  {id:'mike_a', n:'Michael Vincent Aulisio', g:8, p:'kath_v', b:'24 Jun 1979, Elyria, OH'},
+  {id:'doug_f', n:'Douglas Alan Futrall', g:8, p:'peggy_v', b:'29 Mar 1967, Lorain, OH', m:'Mellody'},
+  {id:'nic_f', n:'Nicole Futrall', g:9, p:'doug_f', b:'1986'},
+  {id:'dougj_f', n:'Douglas J. Futrall', g:9, p:'doug_f', b:'1992'},
+  {id:'sarah_v', n:'Sarah Vanche', g:8, p:'alex_v3', b:'1983'},
+  {id:'josh_v', n:'Joshua Vanche', g:8, p:'alex_v3', b:'1987'},
+  {id:'alexj_v', n:'Alex John Vanche', g:8, p:'alex_v3', b:'1994'},
+
+  // Mary × William Ellison
+  {id:'carol_e', n:'Carol Ann Ellison', g:7, p:'puskas_mary', b:'22 Jan 1950, Elyria, OH', m:'Clint Pitzer, 19 Nov 1971'},
+  {id:'judy_e', n:'Judy Lynn Ellison', g:7, p:'puskas_mary', b:'17 Jun 1953, Elyria, OH', m:'Dale Rains, 29 Dec 1973, Baytown, TX'},
+  {id:'marys_e', n:'Mary Sue Ellison', g:7, p:'puskas_mary', b:'4 Dec 1961, Elyria, OH'},
+  {id:'geo_e', n:'George Marshall Ellison', g:7, p:'puskas_mary', b:'11 Apr 1963, Elyria, OH', m:'Jenny Walsh'},
+  {id:'todd_p', n:'Todd Pitzer', g:8, p:'carol_e', b:'1968', m:'Debbie Robinson'},
+  {id:'david_p', n:'David Pitzer', g:8, p:'carol_e', b:'1970'},
+  {id:'angela_p', n:'Angela Pitzer', g:8, p:'carol_e', b:'1973', m:'James Cipeche'},
+  {id:'joshu_p', n:'Joshua Pitzer', g:9, p:'todd_p', b:'1988'},
+  {id:'katl_p', n:'Katlin Pitzer', g:9, p:'todd_p', b:'1994'},
+  {id:'jeff_c', n:'Jeffery Cipeche', g:9, p:'angela_p', b:'1993'},
+  {id:'alan_r', n:'Alan Dale Rains', g:8, p:'judy_e', b:'30 May 1975, Houston, TX'},
+  {id:'becky_r', n:'Becky Renee Rains', g:8, p:'judy_e', b:'23 Apr 1978, Joplin, MO'},
+
+  // George Puskas × Mary Huff
+  {id:'mich_p', n:'Michael David Puskas', g:7, p:'puskas_geo', b:'4 Mar 1955, Oberlin, OH', m:'Rose Marie Johnson, 28 Sep 1974'},
+  {id:'dan_p', n:'Daniel Lee Puskas', g:7, p:'puskas_geo', b:'10 Aug 1957, Oberlin, OH', m:'Kenda Rickett, 1 Dec 1979'},
+  {id:'sher_p', n:'Sherry Louise Puskas', g:7, p:'puskas_geo', b:'30 Jul 1959, Bay Village, OH', m:'Martin John Ogle, 4 Jul 1977'},
+  {id:'kathr_p', n:'Kathryn Sue Puskas', g:7, p:'puskas_geo', b:'26 May 1962, Wellington, OH', m:'James P. Penkava'},
+  {id:'faith_p', n:'Faith Anne Puskas', g:8, p:'mich_p', b:'30 Mar 1976, Oberlin, OH'},
+  {id:'chry_p', n:'Chrystal Dawn Puskas', g:8, p:'dan_p', b:'4 Dec 1978, Ashland, OH'},
+  {id:'charles_o', n:'Charles Richard Ogle', g:8, p:'sher_p', b:'5 Sep 1979, Oberlin, OH'},
+  {id:'jeremy_o', n:'Jeremy A. Ogle', g:8, p:'sher_p', b:'1982'},
+  {id:'andrew_o', n:'Andrew J. Ogle', g:8, p:'sher_p', b:'1984'},
+  {id:'christen_o', n:'Christen Danelle Ogle', g:8, p:'sher_p', b:'1995'},
+  {id:'erin_pe', n:'Erin E. Penkava', g:8, p:'kathr_p', b:'1983'},
+
+  // Dolores × Charles Yonkings
+  {id:'cb_y', n:'Charles Borki Yonkings', g:7, p:'puskas_dol', b:'8 Oct 1957, Lorain, OH', m:'Candace Issac, 19 Sep 1975'},
+  {id:'laura_y', n:'Laura Dee Yonkings', g:7, p:'puskas_dol', b:'4 Jul 1959, Lorain, OH', m:'Michael Benko, Jr.'},
+  {id:'lisa_y', n:'Lisa Kay Yonkings', g:7, p:'puskas_dol', b:'21 Mar 1964, Lorain, OH', m:'Ray Allen Johnson'},
+  {id:'david_y', n:'David Ryan Yonkings', g:7, p:'puskas_dol', b:'16 Mar 1967, Elyria, OH', m:'Christine L. Kauffman'},
+  {id:'air_y', n:'Airielle S. Yonkings', g:8, p:'cb_y', b:'1979'},
+  {id:'cm_y', n:'Charles M. Yonkings', g:8, p:'cb_y', b:'1981'},
+  {id:'del_j', n:'Delilah M. Johnsen', g:8, p:'lisa_y', b:'1987'},
+  {id:'jac_j', n:'Jacob A. Johnsen', g:8, p:'lisa_y', b:'1991'},
+  {id:'dm_y', n:'David M. Yonkings', g:8, p:'david_y', b:'1990'},
+  {id:'dr_y', n:'Douglas R. Yonkings', g:8, p:'david_y', b:'1992'},
+  {id:'sm_y', n:'Stephanie Mikayla Yonkings', g:8, p:'david_y', b:'1994'},
+
+  // ========== Gen 6 — Mary Ann × William Papay ==========
+  {id:'will_pa', n:'William Paul Papay', g:6, p:'mary5', b:'24 Jan 1923, Lorain, OH', m:'Virginia June Sippel, 15 Jun 1946'},
+  {id:'frank_pa', n:'Frank Steve Papay', g:6, p:'mary5', b:'12 May 1924, Lorain, OH', m:'Virginia Kay Plato, 29 Oct 1949'},
+  {id:'gil_pa', n:'Gilbert Joseph Papay', g:6, p:'mary5', b:'11 Jun 1930, Lorain, OH', m:'Barbara Ann McDivitt, 15 Sep 1951'},
+  {id:'ern_pa', n:'Ernest John Papay', g:6, p:'mary5', b:'19 Oct 1932, Elyria, OH', m:'Dorothy Mary Kangas, 18 Apr 1953'},
+  {id:'mka_pa', n:'Maryann Katherine Papay', g:6, p:'mary5', b:'24 Aug 1946, Lorain, OH', m:'Robert Henry Stillwell, 24 Jun 1967'},
+
+  {id:'chri_pa', n:'Christine Ruth Papay', g:7, p:'will_pa', b:'1 Apr 1950, Elyria, OH', m:'David George Hampshire, 23 Mar 1972, Whiteman Air Force Base, MO', note:'Christine R. Hampshire is the author/compiler of this genealogy (1981).'},
+  {id:'debra_pa', n:'Debra Jean Papay', g:7, p:'will_pa', b:'18 Apr 1956, Elyria, OH', m:'Brian Mark Carder, 6 Oct 1979'},
+  {id:'paul_h', n:'Paul Papay Hampshire', g:8, p:'chri_pa', b:'23 Jun 1976, Bowling Green, OH', m:'Sherry Dawn Edwards, 9 Aug 1997', note:'Airman First Class USAF.'},
+  {id:'rowan_h', n:'Rowan Hampshire', g:9, p:'paul_h', b:'1997'},
+
+  {id:'law_pa', n:'Lawrence William Papay', g:7, p:'frank_pa', b:'12 Aug 1950', d:'4 Jul 1965, Elyria'},
+  {id:'lin_pa', n:'Linda Maryann Papay', g:7, p:'frank_pa', b:'4 Mar 1952', m:'Gary Cooperrider'},
+  {id:'fra_pa', n:'Frances Anthony Dominic Papay', g:7, p:'frank_pa', b:'24 Sep 1953'},
+  {id:'jud_pa', n:'Judith Ann Marie Papay', g:7, p:'frank_pa', b:'10 Mar 1955', m:'Tim Otten'},
+  {id:'jam_pa', n:'James Gerard Papay', g:7, p:'frank_pa', b:'22 Sep 1960'},
+  {id:'ant_pa', n:'Anthony Gerard Papay', g:7, p:'frank_pa', b:'2 Jun 1966'},
+  {id:'jes_c', n:'Jessica Cooperrider', g:8, p:'lin_pa', b:'20 Mar 1985'},
+  {id:'kurt_c', n:'Kurt Cooperrider', g:8, p:'lin_pa', b:'13 Feb 1988'},
+  {id:'oli_o', n:'Olivia Otten', g:8, p:'jud_pa', b:'29 Aug 1988'},
+
+  {id:'peg_pa', n:'Peggy Ann Papay', g:7, p:'gil_pa', b:'15 Jan 1957, Griffith AFB, Rome, NY', m:'Roger F. Raymore, 27 Sep 1980'},
+  {id:'pam_pa', n:'Pamela Sue Papay', g:7, p:'gil_pa', b:'31 Jan 1963, Toledo, OH', m:'Joseph Szmania, 8 Oct 1994'},
+  {id:'pat_pa', n:'Patricia Helen Papay', g:7, p:'gil_pa', b:'4 Mar 1965, Toledo, OH', m:'Phillip Keys'},
+  {id:'fra_sz', n:'Francis J. Szmania', g:8, p:'pam_pa', b:'3 Oct 1996, Sylvania, OH'},
+  {id:'dar_sz', n:'Darby Ann Szmania', g:8, p:'pam_pa', b:'26 Feb 1999, Sylvania, OH'},
+  {id:'phi_k', n:'Phillip Keys', g:8, p:'pat_pa', b:'16 Feb 1991, Columbus, OH'},
+
+  {id:'jos_pa', n:'Joseph Scott Papay', g:7, p:'ern_pa', b:'3 Nov 1958, Wooster, OH'},
+  {id:'mary_pa', n:'Mary Frances Papay', g:7, p:'ern_pa', b:'5 Feb 1960, Cleveland, OH', m:'Michael S. Congelio, 23 May 1992'},
+  {id:'han_co', n:'Hannah Shae Congelio', g:8, p:'mary_pa', b:'16 Jan 1994'},
+  {id:'cod_co', n:'Cody Michael Congelio', g:8, p:'mary_pa', b:'7 Jun 1995'},
+
+  {id:'lisa_st', n:'Lisa Margaret Stillwell', g:7, p:'mka_pa', b:'5 Apr 1968, Elyria, OH'},
+  {id:'kri_st', n:'Kristen Marie Stillwell', g:7, p:'mka_pa', b:'24 Aug 1973, Elyria, OH'},
+
+  // ========== Gen 6 — Stephen Jr. × Elizabeth Kochis ==========
+  {id:'lillian6', n:'Lillian E. Stumphauzer', g:6, p:'stephenjr5', b:'17 Jun 1929, Lorain, OH', m:'Sylvester C. Alten, 17 Sep 1949, Avon, OH'},
+  {id:'theo6', n:'Stephen Theodore Stumphauzer', aka:'Ted', g:6, p:'stephenjr5', b:'2 Oct 1932, Avon, OH', m:'Bernice Anne Boris, 24 Oct 1953, St. Vincent de Paul, Elyria'},
+  {id:'che_al', n:'Cheryn Elizabeth Alten', g:7, p:'lillian6', b:'27 Dec 1950, Lorain, OH', m:'Thomas Price Houston, MD, 16 Jul 1983'},
+  {id:'jam_al', n:'James Stephen Alten', g:7, p:'lillian6', b:'23 Nov 1954, Lorain, OH', m:'Karen Elizabeth Woodrow, 25 Oct 1984'},
+  {id:'sth_ho', n:'Stephen Thomas Houston', g:8, p:'che_al', b:'22 Sep 1988'},
+  {id:'kat_al', n:'Katherine Elizabeth Ann Alten', g:8, p:'jam_al', b:'13 May 1986, Dallas, TX'},
+  {id:'mer_al', n:'Merideth Elaine Mae Alten', g:8, p:'jam_al', b:'11 Sep 1988, Dallas, TX'},
+
+  {id:'sm_st', n:'Stephen Michael Stumphauzer', g:7, p:'theo6', b:'2 Mar 1955, Elyria, OH', m:'Julianne Marie Smith, 7 Aug 1982'},
+  {id:'reb_st', n:'Rebecca Anne Stumphauzer', g:7, p:'theo6', b:'4 Jun 1956, Elyria, OH', m:'Richard Jay Yoch, 14 Jul 1979, St. Mary\'s, Avon'},
+  {id:'pat_st', n:'Patricia Anne Stumphauzer', g:7, p:'theo6', b:'18 Jul 1958, Elyria, OH', m:'Richard D. Abbott then Andrew Youngross'},
+  {id:'barb_st', n:'Barbara Anne Stumphauzer', g:7, p:'theo6', b:'9 Sep 1962, Elyria, OH', m:'Phillip David Whitt, 28 May 1988, Avon'},
+  {id:'teo_st', n:'Theodore Joseph Stumphauzer', g:7, p:'theo6', b:'5 Dec 1965, Elyria, OH', m:'Debby Sue Hennen, 20 Jul 1991, Cuyahoga Falls'},
+
+  {id:'ther_st', n:'Theresa Marie Stumphauzer', g:8, p:'sm_st', b:'2 May 1984, Lorain, OH'},
+  {id:'ama_st', n:'Amanda Marie Stumphauzer', g:8, p:'sm_st', b:'5 Jul 1985, Lorain, OH'},
+  {id:'ste_st', n:'Stephen Eugene Stumphauzer', g:8, p:'sm_st', b:'23 Apr 1988, Lorain, OH'},
+  {id:'rach_y', n:'Rachel Anne Yoch', g:8, p:'reb_st', b:'4 Dec 1980, Templeton, CA'},
+  {id:'ren_y', n:'Renee E. Yoch', g:8, p:'reb_st', b:'13 Nov 1981, Templeton, CA'},
+  {id:'ron_ab', n:'Ronald C. Abbott', g:8, p:'pat_st', b:'1990'},
+  {id:'kath_yg', n:'Katherine R. Youngross', g:8, p:'pat_st', b:'1993'},
+  {id:'mer_yg', n:'Meredith Youngross', g:8, p:'pat_st'},
+  {id:'jes_wh', n:'Jessica C. Whitt', g:8, p:'barb_st', b:'1993'},
+  {id:'emi_wh', n:'Emily R. Whitt', g:8, p:'barb_st', b:'1997'},
+  {id:'alex_st', n:'Alexander J. Stumphauzer', g:8, p:'teo_st', b:'16 Apr 1995, Akron, OH'},
+  {id:'steph_st', n:'Stephany T. Stumphauzer', g:8, p:'teo_st', b:'7 Mar 1997, Akron, OH'},
+
+  // ========== Gen 6 — Helen × Julius Pandy ==========
+  {id:'rob_pan', n:'Robert Pandy', g:6, p:'helen5', b:'30 Mar 1931, Lorain, OH', d:'24 Dec 1995', m:'Barbara Junk, 26 Dec 1953'},
+  {id:'ric_pan', n:'Richard Pandy', g:6, p:'helen5', b:'9 Mar 1936, Lorain, OH', m:'Beverly Penman, 22 Jun 1957'},
+  {id:'den_pan', n:'Dennis Pandy', g:6, p:'helen5', b:'14 Jun 1945, Lorain, OH', m:'Carol Bergner, 24 Oct 1970, Utica, NY'},
+  {id:'sus_pan', n:'Susan Renee Pandy', g:7, p:'rob_pan', b:'7 May 1959, Westfield, NY', m:'John Gardner'},
+  {id:'dav_pan', n:'David Alan Pandy', g:7, p:'rob_pan', b:'2 May 1961, Westfield, NY'},
+  {id:'dav_g', n:'David Gardner', g:8, p:'sus_pan'},
+  {id:'emi_g', n:'Emily Gardner', g:8, p:'sus_pan'},
+  {id:'ben_g', n:'Benjamin Gardner', g:8, p:'sus_pan'},
+  {id:'nor_g', n:'Nora C. Gardner', g:8, p:'sus_pan'},
+  {id:'deb_pan', n:'Debra Jean Pandy', g:7, p:'ric_pan', b:'23 Jan 1959, Elyria, OH', m:'Marshall Richards Ransom, 30 Jun 1979'},
+  {id:'kim_pan', n:'Kimberly Pandy', g:7, p:'ric_pan', b:'8 Jul 1960, Elyria, OH', m:'James S. Smola, 22 Jun 1985'},
+  {id:'jea_r', n:'Jeannette Kay Ransom', g:8, p:'deb_pan', b:'13 Aug 1983, Daytona Beach, FL'},
+  {id:'mar_r', n:'Marshall Richard Ransom', g:8, p:'deb_pan', b:'16 Apr 1985, Daytona Beach, FL'},
+  {id:'pat_r', n:'Patrick I. Ransom', g:8, p:'deb_pan', b:'18 Jul 1988, Port Orange, FL'},
+  {id:'mau_r', n:'Maureen E. Ransom', g:8, p:'deb_pan', b:'18 Jul 1988, Port Orange, FL'},
+  {id:'mat_sm', n:'Matthew James Smola', g:8, p:'kim_pan', b:'20 Jun 1988, Elyria, OH'},
+  {id:'jen_sm', n:'Jennifer B. Smola', g:8, p:'kim_pan', b:'12 Nov 1991, Elyria, OH'},
+  {id:'jil_pan', n:'Jill Susanne Pandy', g:7, p:'den_pan', b:'18 May 1972, Kettering, OH', m:'Michael David Burdick, Jr., 10 Jun 1995'},
+  {id:'dia_pan', n:'Diana Lynne Pandy', g:7, p:'den_pan', b:'31 Jan 1975, Manchester, CT', m:'Timothy John Melroy, 5 May 2000'},
+  {id:'tyl_bu', n:'Tyler Aaron Burdick', g:8, p:'jil_pan', b:'29 Oct 1995'},
+
+  // ========== Gen 6 — Joseph × Yolanda Chaszar ==========
+  {id:'jsv_st', n:'Joseph Steven Stumphauzer', g:6, p:'joseph5', b:'22 Apr 1937, Lorain, OH', m:'Gloria Ann Alten, 11 Jan 1958, Avon, OH'},
+  {id:'mar_st', n:'MaryAnn Stumphauzer', g:6, p:'joseph5', b:'8 Mar 1943, Lorain, OH', m:'John W. Burger, Jr., 22 Sep 1962, Monroe, MI'},
+  {id:'jan_st', n:'Jane Stumphauzer', g:6, p:'joseph5', b:'26 Sep 1953, Lorain, OH', m:'Thomas Pope, 15 Dec 1973, St. Peters, Lorain'},
+
+  {id:'dal_st', n:'Dale Joseph Stumphauzer', g:7, p:'jsv_st', b:'18 Feb 1959, Lorain, OH', m:'Angela Ruth Stuber, 23 Aug 1986, St. Anthony of Padua, Elyria'},
+  {id:'dan_st', n:'Daniel John Stumphauzer', g:7, p:'jsv_st', b:'29 Jul 1960, Lorain, OH', d:'28 Sep 1996, Elyria', m:'Donna Lynn Cary, 31 Jan 1986'},
+  {id:'don_st', n:'Donna Jo Stumphauzer', g:7, p:'jsv_st', b:'23 May 1962, Lorain, OH', m:'David Woods, 11 May 1985'},
+  {id:'dav_st', n:'David Jeffrey Stumphauzer', g:7, p:'jsv_st', b:'17 Apr 1966, Lorain, OH', m:'Christine Marie Keeling, 27 Aug 1988'},
+  {id:'den_st', n:'Dennis Joseph Stumphauzer', g:7, p:'jsv_st', b:'20 Jul 1969, Lorain, OH'},
+  {id:'jod_st', n:'Joseph Dale Stumphauzer', g:7, p:'jsv_st', b:'7 Apr 1976, Elyria, OH'},
+
+  {id:'nic_st', n:'Nicole Alysse Stumphauzer', g:8, p:'dal_st', b:'18 Mar 1990'},
+  {id:'yve_st', n:'Yvette M. Stumphauzer', g:8, p:'dal_st', b:'27 May 1993'},
+  {id:'kyl_st', n:'Kyle J. Stumphauzer', g:8, p:'dal_st', b:'1 Jul 1995'},
+  {id:'ama_dan', n:'Amanda Leigh Stumphauzer', g:8, p:'dan_st', b:'5 Jun 1986'},
+  {id:'jos_dan', n:'Joshua T. Stumphauzer', g:8, p:'dan_st', b:'13 Apr 1991'},
+  {id:'dav_w', n:'David Aaron Woods', g:8, p:'don_st', b:'28 May 1986'},
+  {id:'dev_w', n:'Devin A. Woods', g:8, p:'don_st', b:'17 Nov 1992'},
+  {id:'lau_dj', n:'Lauren Michelle Stumphauzer', g:8, p:'dav_st', b:'8 May 1991'},
+  {id:'kat_dj', n:'Katelyn Marie Stumphauzer', g:8, p:'dav_st', b:'29 Jul 1992'},
+  {id:'jen_dj', n:'Jennifer Ann Stumphauzer', g:8, p:'dav_st', b:'16 Nov 1996'},
+
+  {id:'dav_bu', n:'David James Burger', g:7, p:'mar_st', b:'18 Sep 1964, Lorain, OH', m:'Lee Ann Cirell, then Barbara Antus'},
+  {id:'ash_bu', n:'Ashley J. Burger', g:8, p:'dav_bu', b:'12 Oct 1988, Amherst, OH'},
+  {id:'bri_an', n:'Brittany Antus', g:8, p:'dav_bu', b:'19 Apr 1989, Lorain, OH'},
+  {id:'kay_bu', n:'Kayla Marie Burger', g:8, p:'dav_bu', b:'22 Jul 1996, Westlake, OH'},
+  {id:'joh_po', n:'John Thomas Pope', g:7, p:'jan_st', b:'1 Jan 1980, Lorain, OH'},
+  {id:'ros_po', n:'Rose M. Pope', g:7, p:'jan_st', b:'1981'},
+  {id:'kat_po', n:'Kathryn Pope', g:7, p:'jan_st', b:'28 Apr 1983'},
+
+  // ========== Gen 6 — John × Emma Nagy ==========
+  {id:'joh_st', n:'John Edward Stumphauzer, Sr.', g:6, p:'john5', b:'30 Jul 1938, Elyria, OH', m:'Carolyn Marjorie Stauder, 3 Oct 1959, Holy Trinity, Avon, OH'},
+  {id:'jer_st', n:'Jerome Stephen Stumphauzer', g:6, p:'john5', b:'31 Jan 1941, Elyria, OH'},
+  {id:'lau_js', n:'Laura Jean Stumphauzer', g:7, p:'joh_st', b:'30 Apr 1960, Plattsburg, NY'},
+  {id:'joh_jr', n:'John Edward Stumphauzer, Jr.', g:7, p:'joh_st', b:'9 May 1963, Washington, DC', note:'Breech birth, like his grandfather John.'},
+  {id:'lism_st', n:'Lisa Marie Stumphauzer', g:7, p:'joh_st', b:'25 Oct 1964, Washington, DC', m:'Michael Raue, 12 Jun 1993'},
+  {id:'bri_st', n:'Brian Arthur Stumphauzer', g:7, p:'joh_st', b:'16 Sep 1969, Silver Spring, MD', m:'Maria Garza, 21 Jun 1997, University of Maryland Chapel'},
+
+  // ========== Gen 6 — William × Kathryn Horvath ==========
+  {id:'eve_st', n:'Evelyn Arlene Stumphauzer', g:6, p:'william5', b:'13 Sep 1939, Lorain, OH', m:'Peter Kim Packard, 28 Apr 1962, St. Vincent de Paul, Elyria'},
+  {id:'wilc_st', n:'William Carl Stumphauzer', g:6, p:'william5', b:'10 Jul 1942, Lorain, OH', m:'Elaine A. Niesen, 2 Oct 1965, then Veronica Nemeth'},
+  {id:'ken_st', n:'Kenneth Stephen Stumphauzer', g:6, p:'william5', b:'22 Feb 1945, Lorain, OH', m:'Gail Celano, 27 Jan 1968, St. Vincent de Paul, Elyria'},
+  {id:'kae_st', n:'Kathryn Elaine Stumphauzer', g:6, p:'william5', b:'23 Apr 1946, Elyria, OH', m:'Thomas Solak, 3 Jun 1967, St. Vincent de Paul, Elyria'},
+
+  {id:'laur_pk', n:'Laurel Ann Packard', g:7, p:'eve_st', b:'14 Mar 1963, Fort Wayne, IN', m:'Jeffery Mark Springer, 26 Sep 1987, St. Leonard\'s, Dayton'},
+  {id:'davj_pk', n:'David James Packard', g:7, p:'eve_st', b:'2 Jun 1965, Melrose Park, IL', m:'Monica Anne Stuhr, 9 Apr 1994, Rockford, IL'},
+  {id:'bri_pk', n:'Brian Kim Packard', g:7, p:'eve_st', b:'31 Dec 1969, Williamsport, PA', m:'Cara Suzanne Brannigan, 19 Aug 1995, St. James Catholic, Pennington, NJ'},
+  {id:'laum_sp', n:'Lauren Marie Springer', g:8, p:'laur_pk', b:'30 Nov 1989, Madison, WI', m:'Zack'},
+  {id:'matt_sp', n:'Matthew Ryan Springer', g:8, p:'laur_pk', b:'17 Feb 1992, Madison, WI'},
+  {id:'kay_pk', n:'Kayla Anne Packard', g:8, p:'davj_pk', b:'15 Mar 1999, Indianapolis, IN'},
+  {id:'am_pk', n:'Amanda Marie Packard', g:8, p:'davj_pk', b:'7 Mar 2002, Indianapolis, IN'},
+  {id:'katm_pk', n:'Kathryn Mae Packard', g:8, p:'bri_pk', b:'11 Jun 1998, Boston, MA'},
+  {id:'dank_pk', n:'Daniel Kim Packard', g:8, p:'bri_pk', b:'27 Jul 2000, Beverly, MA'},
+  {id:'kev_pk', n:'Kevin Patrick Packard', g:8, p:'bri_pk', b:'20 Oct 2003, Beverly, MA'},
+  {id:'laua_pk', n:'Laura Anne Packard', g:8, p:'bri_pk', b:'7 Jun 2007, Beverly, MA'},
+
+  {id:'wii_st', n:'William Carl Stumphauzer II', g:7, p:'wilc_st', b:'2 Aug 1966, Lorain, OH', m:'Marie Celeste Dovin, 28 May 1994, St. Joseph\'s, Amherst'},
+  {id:'ther_wc', n:'Therese Marie Stumphauzer', g:7, p:'wilc_st', b:'17 May 1968, Lorain, OH', m:'Benjamin J. Gill, 23 Sep 1988, then Kevin McDowell, 7 Oct 1995'},
+  {id:'kri_wc', n:'Kristen Leigh Stumphauzer', g:7, p:'wilc_st', b:'16 Sep 1991, Lorain, OH'},
+  {id:'ecst_wc', n:'Evelyn Celeste Stumphauzer', g:8, p:'wii_st', b:'12 Sep 1995, Elyria, OH'},
+  {id:'nic_wc', n:'Nicholas Alexander Stumphauzer', g:8, p:'wii_st', b:'26 Aug 1998, Homewood, AL', note:'The user (Nicholas Stumphauzer) appears here — generation 8 of the American line, direct descendant of Michaeleus through István → Matthias → Stephen → William → William II.'},
+  {id:'chr_gi', n:'Christopher Joseph Gill', g:8, p:'ther_wc', b:'28 Jun 1989, Lorain, OH'},
+  {id:'fra_gi', n:'Frances', g:8, p:'ther_wc'},
+
+  {id:'cha_ks', n:'Chad Douglas Stumphauzer', g:7, p:'ken_st', b:'12 Jul 1971, Merced, CA', d:'13 Jul 1971, Merced, CA'},
+  {id:'gre_ks', n:'Gregory Brent Stumphauzer', g:7, p:'ken_st', b:'12 Jul 1971, Merced, CA', d:'13 Jul 1971, Merced, CA'},
+  {id:'kel_ks', n:'Kelly Marie Stumphauzer', g:7, p:'ken_st', b:'4 Nov 1972, Orlando, FL', m:'Bryan Patrick Draga, 24 Mar 2001, St. Peter\'s, Lorain'},
+  {id:'rya_ks', n:'Ryan Keith Stumphauzer', g:7, p:'ken_st', b:'30 Dec 1975, Akron, OH', m:'Celinet, 11 Nov 2011, Florida'},
+  {id:'ken_ks', n:'Kenneth Matthew Stumphauzer', g:7, p:'ken_st', b:'15 Jan 1980, Lorain, OH', m:'Lesley, 21 Apr 2012, New York'},
+  {id:'marg_ks', n:'Margeau Nicole Stumphauzer', g:7, p:'ken_st', b:'12 Jan 1982, Lorain, OH'},
+  {id:'nat_ks', n:'Nathan Stumphauzer', g:8, p:'rya_ks', b:'14 Feb 2014, Florida'},
+  {id:'sla_ks', n:'Slater Stumphauzer', g:8, p:'ken_ks', b:'11 Aug 2014'},
+
+  {id:'tho_so', n:'Thomas Scott Solak', g:7, p:'kae_st', b:'5 Sep 1968, Elyria, OH', m:'Lynne Williams, 8 Oct 1994, St. Vincent de Paul'},
+  {id:'tod_so', n:'Todd Patrick Solak', g:7, p:'kae_st', b:'17 Mar 1970, Toledo, OH', m:'Lori Denise Powell, 10 Sep 1994, United Church of Christ, Avon'},
+  {id:'tri_so', n:'Tricia Leigh Solak', g:7, p:'kae_st', b:'23 Jun 1971, Lorain, OH', m:'Michael Gerald Nejman, 29 May 1999'},
+  {id:'kra_so', n:'Kraig Kenneth Solak', g:7, p:'kae_st', b:'20 Sep 1974, Fairview Park, OH', m:'Andrea'},
+  {id:'cou_so', n:'Courtney Denise Solak', g:8, p:'tod_so', b:'17 Sep 1998'},
+  {id:'bab_so', n:'Solak', g:8, p:'tod_so', b:'Mar 2001'},
+
+  // ========== Gen 6 — Frank × Goldie Kocsis ==========
+  {id:'ron_fk', n:'Ronald Frank Stumphauzer', g:6, p:'frank5', b:'26 Apr 1940, Elyria, OH', m:'Sylvia Marie Vaughn, 25 May 1963, Lorain'},
+  {id:'nan_fk', n:'Nancy Sharon Stumphauzer', g:6, p:'frank5', b:'16 Dec 1949, Lorain, OH', m:'Donald Alan Kozich, Sr., 20 Jun 1970, St. Ladislaus, Lorain'},
+  {id:'don_fk', n:'Donna Marie Stumphauzer', g:7, p:'ron_fk', b:'30 Oct 1964, Lorain, OH', m:'Ray Birchfield'},
+  {id:'mic_fk', n:'Michelle Sue Stumphauzer', g:7, p:'ron_fk', b:'5 Apr 1966, Lorain, OH', m:'Robert Kayser'},
+  {id:'lis_fk', n:'Lisa Ann Stumphauzer', g:7, p:'ron_fk', b:'3 May 1967, Lorain, OH', m:'Gordon Kilgore'},
+  {id:'bet_fk', n:'Beth Ann Stumphauzer', g:7, p:'ron_fk', b:'24 Aug 1969, Lorain, OH', m:'Darren Henning'},
+  {id:'ronj_fk', n:'Ronald Frank Stumphauzer', g:7, p:'ron_fk', b:'17 Feb 1976, Lorain, OH'},
+  {id:'wya_ka', n:'Wyatt Kayser', g:8, p:'mic_fk', b:'1998'},
+  {id:'jus_ki', n:'Justin A. Kilgore', g:8, p:'lis_fk', b:'1994'},
+  {id:'bri_he', n:'Brittany Henning', g:8, p:'bet_fk', b:'1992'},
+  {id:'dan_he', n:'Danielle L. Henning', g:8, p:'bet_fk', b:'1994'},
+  {id:'don_ko', n:'Donald Alan Kozich II', g:7, p:'nan_fk', b:'6 Jul 1971, Lorain, OH', m:'Melissa Lynn McElroy, 28 Sep 1996, St. Anthony of Padua'},
+  {id:'dan_ko', n:'Daniel Richard Kozich', g:7, p:'nan_fk', b:'24 Dec 1975, Lorain, OH'},
+  {id:'den_ko', n:'Denise Marie Kozich', g:7, p:'nan_fk', b:'16 Dec 1979, Lorain, OH'},
+  {id:'han_ko', n:'Hanna Nicole Kozich', g:8, p:'don_ko', b:'15 Jun 1998', d:'15 Jun 1998 (stillborn)'},
+  {id:'kai_ko', n:'Kaitlin Nicole Kozich', g:8, p:'don_ko', b:'18 May 1999'},
+  {id:'jac_ko', n:'Jacob Anthony Kozich', g:8, p:'den_ko', b:'26 Feb 1999'},
+
+  // ========== Gen 6 — Irene × Eugene Andreozzi ==========
+  {id:'cel_an', n:'Celeste Terese Andreozzi', g:6, p:'irene5', b:'2 Apr 1947, Detroit, MI', m:'Dale Joseph Watts, 8 Oct 1971, Farmington, MI'},
+  {id:'noe_an', n:'Noel Gene Andreozzi', g:6, p:'irene5', b:'25 Dec 1950, Detroit, MI'},
+  {id:'dea_an', n:'Dean Hugo Andreozzi', g:6, p:'irene5', b:'27 Feb 1955, Detroit, MI'},
+  {id:'dar_wa', n:'Darren David Watts', g:7, p:'cel_an', b:'18 Feb 1977, Southfield, MI'},
+  {id:'ada_wa', n:'Adam James Watts', g:7, p:'cel_an', b:'14 Nov 1979, Southfield, MI'},
+
+  // ========== Gen 6 — Jesse × June Bender ==========
+  {id:'lin_je', n:'Linda Marie Stumphauzer', g:6, p:'jesse5', b:'27 Nov 1949, Elyria, OH', m:'Thomas Franklin Buswell, 31 Jul 1971, North Ridgeville, OH'},
+  {id:'dia_je', n:'Diane June Stumphauzer', g:6, p:'jesse5', b:'27 Dec 1950, Elyria, OH', m:'Lynn Harold Robinson, 14 Jun 1975, North Ridgeville, OH'},
+  {id:'car_je', n:'Carol Ann Stumphauzer', g:6, p:'jesse5', b:'10 Oct 1953, Bay Village, OH', m:'James Scott Hrivnak, 10 Jul 1976'},
+  {id:'rob_je', n:'Robert Edward Stumphauzer', g:6, p:'jesse5', b:'6 Jun 1956, Elyria, OH'},
+  {id:'jan_je', n:'Janet Elaine Stumphauzer', g:6, p:'jesse5', b:'7 Apr 1959, Bay Village, OH'},
+  {id:'deb_je', n:'Debra Jean Stumphauzer', g:6, p:'jesse5', b:'7 Oct 1961, Bay Village, OH', m:'Timothy John Brown, 12 Apr 1986, Avon, OH'},
+  {id:'ric_je', n:'Richard Allen Stumphauzer', g:6, p:'jesse5', b:'26 Jul 1964, Elyria, OH'},
+  {id:'tod_bu', n:'Todd Richard Buswell', g:7, p:'lin_je', b:'17 Jul 1973, Elyria, OH'},
+  {id:'laum_bu', n:'Laura Marie Buswell', g:7, p:'lin_je', b:'3 Apr 1975, Elyria, OH'},
+  {id:'car_ro', n:'Carrie Lynn Robinson', g:7, p:'dia_je', b:'5 Feb 1977, Elyria, OH'},
+  {id:'brj_ro', n:'Brian Jay Robinson', g:7, p:'dia_je', b:'26 Jan 1980, Elyria, OH'},
+  {id:'jes_br', n:'Jessica Erin Brown', g:7, p:'deb_je', b:'20 Oct 1987, Westlake, OH'},
+  {id:'tim_br', n:'Timothy Brown', g:7, p:'deb_je', b:'18 Sep 1990', d:'18 Sep 1990'},
+  {id:'sta_br', n:'Stacey Brown', g:7, p:'deb_je', b:'18 Sep 1990', d:'18 Sep 1990'},
+  {id:'lin_br', n:'Lindsey Nicole Brown', g:7, p:'deb_je', b:'7 Nov 1992, Westlake, OH'},
+  {id:'sco_br', n:'Scott Andrew Brown', g:7, p:'deb_je', b:'3 Sep 1994, Westlake, OH'},
+  {id:'cas_br', n:'Casey Elizabeth Brown', g:7, p:'deb_je', b:'13 Aug 1996, Westlake, OH'},
+
+  // ========== Gen 6 — Margaret × Donald Cook ==========
+  {id:'den_co', n:'Dennis James Cook', g:6, p:'margaret5', b:'12 Apr 1951, Elyria, OH', d:'19 Sep 1990', m:'Linda D. Block Hughes, 16 Jun 1984, St. Paul Lutheran, Westlake'},
+  {id:'dar_co', n:'Darlene Rose Cook', g:6, p:'margaret5', b:'23 Nov 1956, Elyria, OH', m:'Wesley Dean Cochran, 14 Jun 1974, then Jim Bewley, 1982'},
+  {id:'sus_co', n:'Susan Elaine Cook', g:6, p:'margaret5', b:'5 Oct 1962, Elyria, OH', m:'Sam Cicero, 21 Mar 1986, then Raymond Gray'},
+  {id:'den_hu', n:'Dennis Hughes', g:7, p:'den_co', b:'1971', m:'Christine Bridgett'},
+  {id:'mat_hu', n:'Matthew Hughes', g:7, p:'den_co', b:'1973'},
+  {id:'eli_hu', n:'Elizabeth Hughes', g:8, p:'den_hu', b:'1994'},
+  {id:'wes_co', n:'Wesley Dean Cochran, Jr.', g:7, p:'dar_co', b:'26 Aug 1974, Fairview, OH'},
+  {id:'ran_co', n:'Randall Alexander Cochran', g:7, p:'dar_co', b:'22 Aug 1975, Fairview, OH'},
+  {id:'jen_be', n:'Jennifer Ann Bewley', g:7, p:'dar_co', b:'16 Dec 1983'},
+  {id:'pat_ben', n:'Patricia A. Benevento', g:7, p:'sus_co', b:'31 Jul 1980, St. Joseph\'s, Lorain'},
+  {id:'bre_ci', n:'Bree Cicero', g:7, p:'sus_co', b:'6 Jun 1976'},
+  {id:'min_ci', n:'Mindy Cicero', g:7, p:'sus_co', b:'27 Jan 1980'},
+  {id:'don_gr', n:'Donald I. R. Gray', g:7, p:'sus_co', b:'1992'},
+
+  // ========== Matthew (gen 4) Hungarian-Canadian branch ==========
+  {id:'eliz_j', n:'Elizabeth Jakly', g:4, p:'matthew4', s:true, b:'1884, Aldebrő', d:'c.18 Mar 1911, Stockholm, SK'},
+  {id:'margit5', n:'Margit Stumphauzer', g:5, p:'matthew4', b:'16 Mar 1907, Stockholm, SK'},
+  {id:'matt5', n:'Matthew Stumphauzer', g:5, p:'matthew4', b:'12 Apr 1909, Stockholm, SK', m:'Mary Barbara Csako, 21 Nov 1936, Detroit, MI'},
+  {id:'jos5_sc', n:'Joseph Stumphauzer Schaufert', g:5, p:'matthew4', b:'18 Mar 1911, Stockholm, SK', m:'Georgina Schwitzer, 1930, Stockholm, SK'},
+  {id:'mwi6', n:'Matthew William Stumphauzer', g:6, p:'matt5', b:'29 Apr 1939, Detroit, MI', m:'Pamela Jean Snyder, 19 Aug 1967, Goose Bay, Labrador'},
+  {id:'msm_st', n:'Michael Steven Stumphauzer', g:7, p:'mwi6', b:'29 Dec 1968, Trenton, MI'},
+  {id:'ton_st', n:'Tonya Lynn Stumphauzer', g:7, p:'mwi6', b:'14 Oct 1970, Wyandotte, MI'},
+  {id:'gil_sc', n:'Gilbert Schaufert', g:6, p:'jos5_sc'},
+  {id:'wil_sc', n:'Wilfred Schaufert', g:6, p:'jos5_sc'},
+  {id:'lou_sc', n:'Louise Schaufert', g:6, p:'jos5_sc'},
+  {id:'del_sc', n:'Delores Schaufert', g:6, p:'jos5_sc'},
+
+  // ========== Geza (gen 4) Hungarian branch — remained in Hungary ==========
+  {id:'mar_ge4', n:'Maria Kurczveil', g:4, p:'geza4', s:true},
+  {id:'gyo5', n:'György Stumphauzer', g:5, p:'geza4'},
+  {id:'mary5g', n:'Maria Stumphauzer', g:5, p:'geza4', m:'Lajos Tasi I'},
+  {id:'gezaII5', n:'Geza Stumphauzer II', g:5, p:'geza4', m:'Erzsebet Rieszol'},
+  {id:'kal5', n:'Kalman Stumphauzer I', g:5, p:'geza4', m:'Erzsebet Czibulka'},
+  {id:'mih5', n:'Mihaly Stumphauzer', g:5, p:'geza4', m:'Ilona Taisz'},
+  {id:'ell6', n:'Ella Stumphauzer', g:6, p:'gyo5'},
+  {id:'eri6', n:'Erika Stumphauzer', g:6, p:'gyo5'},
+  {id:'roza6', n:'Rozalia Tasi', g:6, p:'mary5g', m:'Istvan Selmeci'},
+  {id:'lajII6', n:'Lajos Tasi II', g:6, p:'mary5g', m:'Maria Farkas'},
+  {id:'csa_se', n:'Csaba Selmeci', g:7, p:'roza6'},
+  {id:'zso_se', n:'Zsolti Selmeci', g:7, p:'roza6'},
+  {id:'rob_ta', n:'Robert Tasi', g:7, p:'lajII6'},
+  {id:'gezaIII6', n:'Geza Stumphauzer III', g:6, p:'gezaII5'},
+  {id:'imre6', n:'Imre Stumphauzer I', g:6, p:'gezaII5', m:'Paula Pasnyar'},
+  {id:'jos6', n:'Joska Stumphauzer', g:6, p:'gezaII5', m:'Sarolta Mahoczki'},
+  {id:'imreII7', n:'Imre Stumphauzer II', g:7, p:'imre6', m:'Tunde Paulovszki'},
+  {id:'tam7', n:'Tamas Stumphauzer', g:7, p:'imre6', m:'Ildiko Gulyas'},
+  {id:'tim8', n:'Timea Stumphauzer', g:8, p:'imreII7'},
+  {id:'nor8', n:'Nora Stumphauzer', g:8, p:'imreII7'},
+  {id:'szi8', n:'Szilvia Stumphauzer', g:8, p:'tam7'},
+  {id:'mar8', n:'Marta Stumphauzer', g:8, p:'tam7'},
+  {id:'zso7', n:'Zsolt Stumphauzer', g:7, p:'jos6'},
+  {id:'kalII6', n:'Kalman Stumphauzer II', g:6, p:'kal5', m:'Katalin Erzsebet Szilagyi'},
+  {id:'katH6', n:'Katalin Stumphauzer', g:6, p:'kal5', m:'Tibor Takacs'},
+  {id:'att7', n:'Attila Stumphauzer', g:7, p:'kalII6', m:'Judit Kukucska'},
+  {id:'gab7', n:'Gabor Stumphauzer', g:7, p:'kalII6', b:'8 Jun 1973'},
+  {id:'tib7', n:'Tibor Stumphauzer', g:7, p:'kalII6'},
+  {id:'dor7', n:'Dora Stumphauzer', g:7, p:'kalII6', m:'Csaba Toth'},
+  {id:'lau8_h', n:'Laura Stumphauzer', g:8, p:'att7'},
+  {id:'ger8', n:'Gergely Stumphauzer', g:8, p:'att7'},
+  {id:'edi_ta', n:'Edit Takacs', g:7, p:'katH6'},
+  {id:'ibo_ta', n:'Ibolya Takacs', g:7, p:'katH6'},
+  {id:'las6', n:'Laszlo Stumphauzer', g:6, p:'mih5', m:'Anna Polacsek'},
+  {id:'ani6', n:'Aniko Stumphauzer', g:6, p:'mih5', m:'Gabor Balazs'},
+  {id:'nora7', n:'Nora Stumphauzer', g:7, p:'las6'},
+  {id:'nik7', n:'Nikolett Stumphauzer', g:7, p:'las6'},
+  {id:'gabV7', n:'Gabor Viktor Balazs', g:7, p:'ani6'},
+  {id:'esz7', n:'Eszter Balazs', g:7, p:'ani6'},
+];
+
+// ============================================================
+// NARRATIVE MONOLITHS — the story arcs from the book
+// ============================================================
+const N = [
+  { id:'preface', title:'Preface', by:'Christine R. Hampshire, 1981',
+    text:`During her teens, my sister gathered some of the nucleus information for this family tree. Later, when I was expecting my son, I expressed my interest in the family genealogy. My initial thoughts extended no further than the small chart of a baby book. However, what she had already accomplished intrigued me.
+
+Naively, I thought my task would be simple and that others would be as eager as I to have the genealogy compiled. Five years later, I am still struggling. With the realization that the genealogy may never attain even 90% completion, I have decided to compile what has been gathered and issue pages of "corrections and additions" in the future, when necessary.
+
+The information has been gathered in several ways — by research thru historical publications, inquiry of government agencies, letters to family members and direct interview where possible. Dates and facts are presented as I received them.
+
+I must thank Aunt Margaret Cook for sending me photocopies of marriage and baptismal papers as copied from the official records of the Catholic parish, Aldebrő, in Hungary. Once translated, they cleared up several mysteries and served as a turning point in this work.
+
+This is a genealogy with some historical background. As such it is a presentation of facts in the form of names, dates and places. It is not biographical.` },
+
+  { id:'hungary', title:'Hungary',
+    text:`In 896, a non-slavic people known as the Magyars migrated from the east. Driven by droughts, which plagued the Siberian plains and the lure of western wealth, they crossed the continent and settled in the middle Danube basin in present-day Hungary.
+
+From 1240 thru 1242, the Mongols raided Hungary. Although Hungary recovered, its native Arpad dynasty was extinct by the 1300s and the crown passed to the Habsburgs.
+
+The Moslem Ottoman Turks began to threaten Hungary in the early 15th Century. Mátyás "the Just" created a standing army, built a chain of defences, reformed the constitution and equalized taxes. After his death in 1490, Suleiman the Magnificent overwhelmed the Hungarian army at Mohács in 1526.
+
+When the Austrian Habsburgs took over Hungary after final peace with the Turks, the country had been devastated. In an area of more than 100,000 square miles there were fewer than four million people; inhabited places were often a day's journey apart.
+
+Probably among the new settlers who rebuilt the country from scratch were the Stumphauzers. We are fortunate that they were Roman Catholic, for the clerics of the day maintained detailed records of marriage and baptism which serve as the only extant record of many of our ancestors.
+
+The 18th page of the "first" volume of marriage records of the Aldebrő parish, Heves County, Eger Diocese, Austria-Hungary is dated February 1805. This is the page which records the marriage of Michaeleus Stumphaursi and Aña Mária Steckelbach.
+
+An archaic German combined form for woodpeddler would be Stumpfhausierer, pronounced shtoompf-how-ze-er. It was common practice to use one's trade for a surname. The modern standardized spelling would have had several variants during the era in question due to the general illiteracy of the period, and the pronunciation would have varied with strong dialect areas.
+
+Michaeleus and Aña's son was baptized Joannes (German for John) Stumphaizer, but married as János (Hungarian for John) Stumphaizer. Thus Magyarization of the line begins creeping in during the early 1800s. With the birth of Mátyás Stumphauzer, son of János Stumphaizer, in 1854, the Hungarian nationalization of the name's spelling is complete, yet traceable to its origin.` },
+
+  { id:'canada', title:'Why Canada?',
+    text:`Emigration to the U.S. had already been flowing in mighty waves while there was still a great deal of prejudice towards Canada. The possibilities of the great West were unknown and permanent settlement on the land was considered an obstacle to a return to Hungary.
+
+What turned the attention of would-be immigrants to Canada? It was pamphlets published by steamship companies — "Esterhaz Magyar Kolonia. Eszaknyugati Tartomanyok Kanada" (Esterhaz Hungarian Colony N.W. Territories) Ottawa Government Printing Press, 1902. The 84-page booklet told of free homesteads of 160 acres with fertile black soil, grazing cattle, groves of poplars, low taxation, great open spaces for hunting, lakes for fishing, abundance of meat and white bread even on weekdays — making each day of the year like an Easter Sunday in Hungary.
+
+The first large contingent from Szaboles county left on March 9th, 1902 — 35 families, about 160 souls. The group was directed through Budapest and Vienna to the Dutch port of Rotterdam, then a small boat to Liverpool, then an ocean-going steamer to St. John, Canada on April 14th. The train arrived at Whitewood on April 19th and friendly people greeted the weary travelers in their mother tongue.
+
+Among the 1903 settlers were Steve Stumphauser and his wife. "It is reported that they brooked passage on a 'cattle' boat. During the passage of about two weeks, Mary Stumphauzer was constantly ill." Stephen obtained a homestead north of Stockholm. While their cabin was being built, Mary and Stephen lived in a "cave in the hillside" on the property and Elizabeth was born there in the spring of 1904.
+
+When the three-room cabin was done, it was plastered with mud and whitewashed. The roof consisted of large twigs and cut sod. In winter, it was not unusual for the snow to drift against the cabin as high as the roof, making it necessary for Stephen to dig them out in the morning. Eventually, Stephen and his wife's brother-in-law, Mike Herman, decided to seek a "milder climate."` },
+
+  { id:'avon', title:'To Avon',
+    text:`Before moving their families, the household heads took short trips into areas of the United States to seek out a suitable location. In 1915, Mike Herman bought a farm in Avon. Afterwards, Stephen sent money to him for the purchase of the Long Road farm.
+
+Two weeks after the birth of Frank Stumphauzer in November of 1916, Stephen and Mary with their eight children made the two day train trip to their new home. On this trip, they were bringing along with all their personal belongings, two trunks of smoked and cured meats. The Stumphauzers arrived in Avon, but the meats never did.
+
+This time shelter was waiting for the immigrants, as there was already a house on their new property. At first the farm, situated on both sides of Long Road, was devoted to wheat and corn. They also sold their extra eggs and cheese. After about five years, a 'truck' garden was started on which the entire family labored. There were also grape vineyards for wine and orchards producing apples, peaches and cherries.
+
+Today there are eleven homes in addition to the original dwelling on what was the farm property.` },
+
+  { id:'kinship', title:'Kinship',
+    text:`"Next of kin, in law means the person or persons nearest in relationship by blood to one who has died. Blood relationship (consanguinity) is either lineal or collateral, the former between persons one of whom is in direct line of descent from the other, and the latter between two persons who are in different lines of descent from a common ancestor.
+
+The line consisting of one's grandparent, parent, himself, his child, and his grandchild, is a direct line; while one's uncles, aunts, brothers, sisters, cousins, nephews, and nieces are related to him collaterally.
+
+The children of brothers and sisters are first cousins, or cousins german; the children of first cousins are second cousins to each other; those of second cousins are third cousins to each other, etc. But the terms 'first cousin,' 'second cousin,' etc., should be used only between persons of the same generation. Thus the son or daughter of one's first cousin is not his second cousin but his 'first cousin once removed.'"` },
+
+  { id:'genealogy', title:'Genealogy Notation',
+    text:`Throughout our lives, we are known by different names (christened names, pet names, nick names, etc.) and we are relatively stationary in residence when compared to people whose lives encompassed several countries (Germany, Hungary, Canada, U.S.A.) and almost as many languages.
+
+Abbreviations used throughout this Codex:
+ ba.  — Baptized as
+ trC. — Canadian translation & spelling
+ trE. — English proper translation & spelling
+ aka. — Also known as, the name they took or were known by later
+ b.   — born      d.   — died      m.   — married
+ bar. — baptismal record    mr.  — marriage record
+
+The small numbers following first names differentiate between generations, starting with those who immigrated to Canada as 4 (4th generation known). Everyone with the same little number is in the same generation, regardless of age.
+
+Direct lineage is written backwards. The direct bloodline of the compiler's son would be written: Paul⁸, Christine⁷, William⁶, Mary⁵, Stephen⁴, Mátyás³, János², Mihály¹ — read as: Paul, son of Christine, daughter of William, son of Mary, daughter of Stephen, son of Mátyás, son of János, son of Mihály.` },
+];
+
+// ============================================================
+// SCENE SETUP
+// ============================================================
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000308, 0.0018);
+
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 10000);
+camera.position.set(0, 220, 620);
+
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x000308, 1);
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance = 10;
+controls.maxDistance = 3000;
+controls.rotateSpeed = 0.7;
+controls.zoomSpeed = 0.9;
+
+scene.add(new THREE.AmbientLight(0x224455, 0.5));
+const keyLight = new THREE.DirectionalLight(0x88ddff, 0.6);
+keyLight.position.set(300, 500, 400);
+scene.add(keyLight);
+
+// Starfield backdrop
+{
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 4500;
+  const pos = new Float32Array(starCount*3);
+  const col = new Float32Array(starCount*3);
+  for (let i=0; i<starCount; i++) {
+    const r = 1800 + Math.random()*1800;
+    const t = Math.random()*Math.PI*2;
+    const p = Math.acos(2*Math.random()-1);
+    pos[i*3] = r*Math.sin(p)*Math.cos(t);
+    pos[i*3+1] = r*Math.sin(p)*Math.sin(t);
+    pos[i*3+2] = r*Math.cos(p);
+    const b = 0.4 + Math.random()*0.6;
+    const tint = Math.random();
+    col[i*3] = b * (tint<.5?0.55:1);
+    col[i*3+1] = b * (tint<.5?0.85:1);
+    col[i*3+2] = b;
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  starGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const starMat = new THREE.PointsMaterial({size:1.2, vertexColors:true, sizeAttenuation:true, transparent:true, opacity:0.9, depthWrite:false});
+  scene.add(new THREE.Points(starGeo, starMat));
+}
+
+// Faint dust plane for ambient nebula
+{
+  const dust = new THREE.Mesh(
+    new THREE.SphereGeometry(2500, 32, 24),
+    new THREE.MeshBasicMaterial({color:0x0a1828, side:THREE.BackSide, transparent:true, opacity:0.5, depthWrite:false})
+  );
+  scene.add(dust);
+}
+
+// ============================================================
+// TREE LAYOUT — recursive 3D phyllotaxis
+// Each person placed on a sphere around its parent.
+// Generation advances the radial step.
+// ============================================================
+const byId = {};
+for (const person of P) byId[person.id] = person;
+
+const roots = P.filter(x => !x.p);
+const children = {};
+for (const person of P) {
+  if (!person.p) continue;
+  if (!children[person.p]) children[person.p] = [];
+  children[person.p].push(person);
+}
+
+// Count subtree size so parents give bigger arcs to bigger families
+function subtreeSize(id) {
+  const kids = children[id] || [];
+  let s = 1;
+  for (const k of kids) s += subtreeSize(k.id);
+  byId[id]._sz = s;
+  return s;
+}
+for (const r of roots) subtreeSize(r.id);
+
+// Layout: place root at origin, then for each generation step outward
+// Children placed on a spherical cap around direction from grandparent→parent
+const GEN_STEP = 70;
+const ROOT_STEP = 55;
+
+function layout(node, parentDir, baseAngle, totalAngle, depth) {
+  const kids = (children[node.id] || []).slice().sort((a,b)=> (b._sz||1) - (a._sz||1));
+  // Spouses place close to the person (not spread as descendants)
+  const realKids = kids.filter(k => !k.s);
+  const spouses  = kids.filter(k =>  k.s);
+
+  // Place spouses first — small offset beside parent
+  spouses.forEach((sp, i) => {
+    const off = new THREE.Vector3(
+      (Math.random()-0.5)*2,
+      (Math.random()-0.5)*0.5,
+      (Math.random()-0.5)*2
+    ).normalize().multiplyScalar(16 + i*4);
+    sp.pos = node.pos.clone().add(off);
+    layout(sp, parentDir, 0, 0, depth+1);
+  });
+
+  if (realKids.length === 0) return;
+
+  // Compute the local frame from parent direction
+  const forward = parentDir.clone().normalize();
+  const up = Math.abs(forward.y) > 0.9 ? new THREE.Vector3(1,0,0) : new THREE.Vector3(0,1,0);
+  const right = new THREE.Vector3().crossVectors(forward, up).normalize();
+  const ortho = new THREE.Vector3().crossVectors(right, forward).normalize();
+
+  // Angular fan — wider at shallow depth, narrower deep
+  const fan = Math.min(Math.PI * 0.95, Math.max(0.5, Math.PI/Math.max(1,depth)));
+  const step = depth === 0 ? ROOT_STEP*1.8 : GEN_STEP * (1 + 0.02*depth);
+
+  const totalSz = realKids.reduce((s,k)=>s+(k._sz||1),0);
+  let angleCursor = -fan/2;
+
+  realKids.forEach((kid, i) => {
+    const wedge = fan * ((kid._sz||1)/totalSz);
+    const localAngle = angleCursor + wedge/2;
+    angleCursor += wedge;
+
+    // Add a phyllotaxis-style secondary rotation so siblings don't collapse into a line
+    const phyllo = i * 2.399963;
+    const tilt = (Math.random() - 0.5) * 0.4 + (depth * 0.25);
+
+    // Direction in parent's local frame
+    const dir = forward.clone()
+      .multiplyScalar(Math.cos(localAngle))
+      .add(right.clone().multiplyScalar(Math.sin(localAngle) * Math.cos(phyllo + tilt)))
+      .add(ortho.clone().multiplyScalar(Math.sin(localAngle) * Math.sin(phyllo + tilt)))
+      .normalize();
+
+    kid.pos = node.pos.clone().add(dir.clone().multiplyScalar(step));
+    layout(kid, dir, 0, 0, depth+1);
+  });
+}
+
+// Root placement
+for (const r of roots) r.pos = new THREE.Vector3(0, 0, 0);
+for (const r of roots) layout(r, new THREE.Vector3(0, 0, 1), 0, Math.PI*2, 0);
+
+// ============================================================
+// CRYSTAL MESHES
+// ============================================================
+const crystalGroup = new THREE.Group();
+scene.add(crystalGroup);
+const pickables = [];
+
+function crystalMaterial(color, emissive, opacity) {
+  return new THREE.MeshPhongMaterial({
+    color, emissive, emissiveIntensity:1.0,
+    shininess:90, specular:0xffffff,
+    transparent:true, opacity:opacity||0.88,
+    flatShading:true
+  });
+}
+
+function makeCrystal(person) {
+  let color, emissive, size;
+  if (person.s) {
+    // Spouse / in-law
+    color = 0xa8a8c0; emissive = 0x555580; size = 1.8;
+  } else if (person.g <= 4) {
+    // Direct ancestor — warm gold crystal
+    color = 0xffd27a; emissive = 0xff8a20; size = 4.5 - person.g * 0.4;
+  } else {
+    // Descendant — cyan crystal
+    color = 0x88e0ff; emissive = 0x2a7ba8; size = 2.6;
+  }
+  if (person.g === 1) size = 6;
+
+  const geo = new THREE.OctahedronGeometry(size, 0);
+  const mesh = new THREE.Mesh(geo, crystalMaterial(color, emissive));
+  mesh.position.copy(person.pos);
+  mesh.userData = { kind:'person', ref:person };
+
+  // Inner glow — smaller scaled octahedron with additive material
+  const glowGeo = new THREE.OctahedronGeometry(size*1.6, 0);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: person.s ? 0x6666aa : (person.g <= 4 ? 0xffaa55 : 0x4fc8f0),
+    transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false
+  });
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  mesh.add(glow);
+
+  mesh.userData.spinRate = (Math.random()-0.5) * 0.4 + 0.3;
+  mesh.userData.bobPhase = Math.random()*Math.PI*2;
+  mesh.userData.baseY = person.pos.y;
+
+  crystalGroup.add(mesh);
+  pickables.push(mesh);
+  person._mesh = mesh;
+  return mesh;
+}
+
+for (const person of P) makeCrystal(person);
+
+// ============================================================
+// PARENT-CHILD CONNECTION LINES
+// ============================================================
+const lineMat = new THREE.LineBasicMaterial({color:0x3a9ad0, transparent:true, opacity:0.22, depthWrite:false});
+const spouseLineMat = new THREE.LineBasicMaterial({color:0x886699, transparent:true, opacity:0.3, depthWrite:false});
+const lines = new THREE.Group();
+scene.add(lines);
+
+for (const person of P) {
+  if (!person.p) continue;
+  const parent = byId[person.p];
+  if (!parent || !parent.pos || !person.pos) continue;
+  const g = new THREE.BufferGeometry().setFromPoints([parent.pos, person.pos]);
+  const ln = new THREE.Line(g, person.s ? spouseLineMat : lineMat);
+  lines.add(ln);
+}
+
+// ============================================================
+// NARRATIVE MONOLITHS — tall obelisks placed on an outer ring
+// ============================================================
+const narrGroup = new THREE.Group();
+scene.add(narrGroup);
+
+N.forEach((narr, i) => {
+  const angle = (i / N.length) * Math.PI * 2;
+  const r = 820;
+  const x = Math.cos(angle) * r;
+  const z = Math.sin(angle) * r;
+  const y = 60;
+
+  // Tall prism
+  const h = 110;
+  const geo = new THREE.ConeGeometry(14, h, 6, 1);
+  geo.rotateY(Math.PI / 6);
+  const mat = new THREE.MeshPhongMaterial({
+    color:0xffd88a, emissive:0xffaa44, emissiveIntensity:0.8,
+    shininess:120, specular:0xffffff, transparent:true, opacity:0.85, flatShading:true
+  });
+  const monolith = new THREE.Mesh(geo, mat);
+  monolith.position.set(x, y, z);
+  monolith.userData = { kind:'narrative', ref:narr };
+  narrGroup.add(monolith);
+  pickables.push(monolith);
+
+  // Inverted crown
+  const crown = new THREE.Mesh(new THREE.ConeGeometry(18, 32, 6, 1), new THREE.MeshBasicMaterial({
+    color:0xffcb70, transparent:true, opacity:0.22, blending:THREE.AdditiveBlending, depthWrite:false
+  }));
+  crown.position.set(x, y + h/2 + 16, z);
+  narrGroup.add(crown);
+
+  // Base halo
+  const halo = new THREE.Mesh(new THREE.RingGeometry(25, 50, 32), new THREE.MeshBasicMaterial({
+    color:0xffaa44, transparent:true, opacity:0.15, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending
+  }));
+  halo.rotation.x = -Math.PI/2;
+  halo.position.set(x, y - h/2 - 1, z);
+  narrGroup.add(halo);
+
+  narr._mesh = monolith;
+  narr._pos = new THREE.Vector3(x, y, z);
+});
+
+// ============================================================
+// INTERACTION — raycaster, detail panel, hover
+// ============================================================
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let hovered = null;
+
+function onPointerMove(e) {
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+}
+renderer.domElement.addEventListener('pointermove', onPointerMove);
+
+let lastDownTime = 0, lastDownPos = {x:0,y:0};
+renderer.domElement.addEventListener('pointerdown', e => {
+  lastDownTime = performance.now();
+  lastDownPos = {x:e.clientX, y:e.clientY};
+});
+renderer.domElement.addEventListener('pointerup', e => {
+  const dt = performance.now() - lastDownTime;
+  const dd = Math.hypot(e.clientX - lastDownPos.x, e.clientY - lastDownPos.y);
+  if (dt > 250 || dd > 4) return;  // was a drag, not a click
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(pickables, false);
+  if (hits.length > 0) {
+    openTarget(hits[0].object.userData);
+  }
+});
+
+// ----- detail panel -----
+const panel = document.getElementById('panel');
+const panelBody = document.getElementById('panel-body');
+document.getElementById('close').addEventListener('click', closePanel);
+
+function closePanel() {
+  panel.classList.remove('visible');
+  setTimeout(()=>{ panel.style.display='none'; }, 260);
+}
+
+function openTarget(data) {
+  if (data.kind === 'narrative') showNarrative(data.ref);
+  else if (data.kind === 'person') showPerson(data.ref);
+  focusOn(data.ref._mesh || data.ref._pos || data.ref.pos);
+}
+
+function lineageOf(person) {
+  const chain = [];
+  let cur = person;
+  while (cur) { chain.unshift(cur); cur = cur.p ? byId[cur.p] : null; }
+  return chain;
+}
+
+function showPerson(person) {
+  const chain = lineageOf(person);
+  const kids = (children[person.id] || []).filter(k => !k.s);
+  const spouses = (children[person.id] || []).filter(k => k.s);
+
+  let html = `<div class="gen">Generation ${person.g}${person.s ? ' · Spouse' : ''}</div>`;
+  html += `<h2>${person.n}</h2>`;
+  if (person.aka) html += `<div class="row"><div class="k">Also</div><div class="v">${person.aka}</div></div>`;
+  if (person.b)   html += `<div class="row"><div class="k">Born</div><div class="v">${person.b}</div></div>`;
+  if (person.d)   html += `<div class="row"><div class="k">Died</div><div class="v">${person.d}</div></div>`;
+  if (person.m)   html += `<div class="row"><div class="k">Married</div><div class="v">${person.m}</div></div>`;
+  if (person.loc) html += `<div class="row"><div class="k">Of</div><div class="v">${person.loc}</div></div>`;
+  if (person.note) html += `<div class="note">${person.note}</div>`;
+
+  if (chain.length > 1) {
+    const lin = chain.map(p => `<span>${p.n.split(' ')[0]}<sup>${p.g}</sup></span>`).join(' → ');
+    html += `<div class="lineage">Bloodline: ${lin}</div>`;
+  }
+
+  if (spouses.length) {
+    html += `<div class="children"><div class="clabel">Spouse${spouses.length>1?'s':''}</div>`;
+    for (const sp of spouses) html += `<a data-id="${sp.id}">${sp.n}</a>`;
+    html += `</div>`;
+  }
+  if (kids.length) {
+    html += `<div class="children"><div class="clabel">Children (${kids.length})</div>`;
+    for (const k of kids) html += `<a data-id="${k.id}">${k.n}</a>`;
+    html += `</div>`;
+  }
+
+  panelBody.innerHTML = html;
+  panelBody.querySelectorAll('a[data-id]').forEach(a => {
+    a.addEventListener('click', () => {
+      const p = byId[a.dataset.id];
+      if (p) { showPerson(p); focusOn(p._mesh); }
+    });
+  });
+  panel.style.display = 'block';
+  requestAnimationFrame(()=>panel.classList.add('visible'));
+}
+
+function showNarrative(narr) {
+  let html = `<div class="gen">Codex · Narrative</div>`;
+  html += `<h2>${narr.title}</h2>`;
+  if (narr.by) html += `<div class="row"><div class="k">By</div><div class="v">${narr.by}</div></div>`;
+  html += `<div class="narr">${narr.text}</div>`;
+  panelBody.innerHTML = html;
+  panel.style.display = 'block';
+  requestAnimationFrame(()=>panel.classList.add('visible'));
+}
+
+// Smooth focus-fly-to
+let flyTarget = null, flyFrom = null, flyStart = 0;
+function focusOn(meshOrPos) {
+  const target = meshOrPos.position ? meshOrPos.position : meshOrPos;
+  if (!target) return;
+  flyFrom = { lookAt: controls.target.clone(), pos: camera.position.clone() };
+  const dir = camera.position.clone().sub(target).normalize();
+  const dist = (meshOrPos.userData && meshOrPos.userData.kind === 'narrative') ? 120 : 45;
+  flyTarget = { lookAt: target.clone(), pos: target.clone().add(dir.multiplyScalar(dist)) };
+  flyStart = performance.now();
+}
+function updateFly() {
+  if (!flyTarget) return;
+  const t = Math.min(1, (performance.now() - flyStart) / 1200);
+  const e = t < 0.5 ? 2*t*t : -1 + (4-2*t)*t;
+  camera.position.lerpVectors(flyFrom.pos, flyTarget.pos, e);
+  controls.target.lerpVectors(flyFrom.lookAt, flyTarget.lookAt, e);
+  if (t >= 1) flyTarget = null;
+}
+
+// ============================================================
+// INDEX PANEL
+// ============================================================
+const indexEl = document.getElementById('index');
+function buildIndex() {
+  let html = '<h3>Narrative</h3>';
+  for (const n of N) html += `<a data-narr="${n.id}">${n.title}</a>`;
+  html += '<h3>Ancestors (gen 1–4)</h3>';
+  P.filter(p=>p.g<=4 && !p.s).forEach(p=>{
+    html += `<a data-id="${p.id}">${p.n} <sup style="opacity:.5">gen ${p.g}</sup></a>`;
+  });
+  html += '<h3>Children of Stephen & Mary (gen 5)</h3>';
+  P.filter(p=>p.p==='stephen4' && !p.s && p.g===5).forEach(p=>{
+    html += `<a data-id="${p.id}">${p.n}</a>`;
+  });
+  html += '<h3>Hungarian Branches</h3>';
+  P.filter(p=>(p.p==='geza4' || p.p==='matthew4') && !p.s).forEach(p=>{
+    html += `<a data-id="${p.id}">${p.n}</a>`;
+  });
+  indexEl.innerHTML = html;
+
+  indexEl.querySelectorAll('a[data-id]').forEach(a => a.addEventListener('click', () => {
+    const p = byId[a.dataset.id]; if (p) { showPerson(p); focusOn(p._mesh); }
+  }));
+  indexEl.querySelectorAll('a[data-narr]').forEach(a => {
+    const narr = N.find(n=>n.id===a.dataset.narr);
+    a.classList.add('narrative');
+    a.addEventListener('click', () => { showNarrative(narr); focusOn(narr._mesh); });
+  });
+}
+buildIndex();
+
+document.getElementById('toggle-index').addEventListener('click', ()=>indexEl.classList.toggle('hidden'));
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closePanel();
+    flyFrom = { lookAt: controls.target.clone(), pos: camera.position.clone() };
+    flyTarget = { lookAt: new THREE.Vector3(0,0,0), pos: new THREE.Vector3(0,220,620) };
+    flyStart = performance.now();
+  } else if (e.key === 'h' || e.key === 'H') {
+    indexEl.classList.toggle('hidden');
+  }
+});
+
+// ============================================================
+// RESIZE
+// ============================================================
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// ============================================================
+// ANIMATE
+// ============================================================
+const clock = new THREE.Clock();
+function animate() {
+  const t = clock.getElapsedTime();
+  // Hover highlight
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(pickables, false);
+  const h = hits.length > 0 ? hits[0].object : null;
+  if (hovered && hovered !== h) { hovered.material.emissiveIntensity = 1.0; hovered.scale.setScalar(1); }
+  if (h) { h.material.emissiveIntensity = 2.5; h.scale.setScalar(1.35); document.body.style.cursor = 'pointer'; }
+  else { document.body.style.cursor = ''; }
+  hovered = h;
+
+  // Gentle rotation & bobbing of crystals
+  for (const c of pickables) {
+    c.rotation.y += 0.003 * (c.userData.spinRate || 0.3);
+    c.rotation.x += 0.0015;
+    if (c.userData.baseY !== undefined) {
+      c.position.y = c.userData.baseY + Math.sin(t * 0.6 + c.userData.bobPhase) * 0.6;
+    }
+  }
+
+  updateFly();
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+// fade loader once everything is queued
+setTimeout(()=>document.getElementById('loader').classList.add('done'), 350);
+animate();
+</script>
+</body>
+</html>
