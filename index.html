@@ -49,6 +49,19 @@
   #panel .locimg{margin:6px 0 18px;position:relative;border:1px solid rgba(120,200,240,.25);border-radius:3px;overflow:hidden;line-height:0;}
   #panel .locimg img{width:100%;height:180px;object-fit:cover;display:block;filter:saturate(.9) brightness(.95);}
   #panel .locimg .loccap{position:absolute;left:0;right:0;bottom:0;padding:5px 10px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#cfefff;background:linear-gradient(to top,rgba(0,10,20,.9),transparent);}
+
+  /* Tony Stark Mode */
+  #tsm-toggle{position:fixed;right:18px;top:50px;z-index:6;background:rgba(0,10,20,.6);border:1px solid rgba(120,200,240,.3);color:#a8e6ff;padding:6px 10px;font-size:10px;letter-spacing:.2em;cursor:pointer;border-radius:2px;text-transform:uppercase;}
+  #tsm-toggle:hover{background:rgba(30,70,100,.7);}
+  #tsm-toggle.active{background:rgba(255,170,80,.18);border-color:#ffaa40;color:#ffd27a;box-shadow:0 0 18px rgba(255,170,80,.35);}
+  #tsm-panel{position:fixed;right:18px;bottom:18px;width:260px;z-index:6;display:none;background:rgba(4,14,24,.88);border:1px solid rgba(120,200,240,.3);padding:10px;border-radius:3px;backdrop-filter:blur(6px);box-shadow:0 0 30px rgba(40,120,180,.18);}
+  #tsm-panel.visible{display:block;}
+  #tsm-status{font-size:10px;letter-spacing:.25em;color:#a8e6ff;text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+  #tsm-status .mode{color:#ffd27a;}
+  #tsm-canvas{width:100%;height:auto;display:block;border:1px solid rgba(120,200,240,.18);border-radius:2px;transform:scaleX(-1);background:#000;}
+  #tsm-camera{width:100%;margin-top:8px;background:rgba(0,10,20,.6);color:#cfefff;border:1px solid rgba(120,200,240,.2);padding:4px 6px;font-size:10px;border-radius:2px;}
+  #tsm-hint{font-size:10px;color:#6fb2cc;margin-top:8px;line-height:1.55;letter-spacing:.04em;}
+  #tsm-hint kbd{background:rgba(90,180,220,.15);border:1px solid rgba(120,200,240,.3);padding:0 4px;border-radius:2px;color:#a8e6ff;font-family:ui-monospace,monospace;font-size:9px;}
 </style>
 </head>
 <body>
@@ -76,6 +89,24 @@
   <div><kbd>Drag</kbd> orbit &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom</div>
   <div><kbd>Right-drag</kbd> pan &nbsp;·&nbsp; <kbd>Click</kbd> a crystal</div>
   <div><kbd>Esc</kbd> reset view &nbsp;·&nbsp; <kbd>H</kbd> toggle index</div>
+</div>
+
+<button id="tsm-toggle">⌖ Tony Stark Mode</button>
+<div id="tsm-panel">
+  <div id="tsm-status"><span id="tsm-state">Off</span><span class="mode" id="tsm-mode"></span></div>
+  <video id="tsm-video" playsinline autoplay muted style="position:absolute;left:-9999px;top:-9999px;width:2px;height:2px;opacity:.01;pointer-events:none;"></video>
+  <canvas id="tsm-canvas" width="320" height="240"></canvas>
+  <div style="display:flex;gap:6px;margin-top:8px;">
+    <select id="tsm-camera" style="flex:1;margin-top:0;"></select>
+    <button id="tsm-refresh" title="Re-scan cameras" style="background:rgba(0,10,20,.6);border:1px solid rgba(120,200,240,.2);color:#a8e6ff;padding:0 10px;font-size:14px;cursor:pointer;border-radius:2px;">↻</button>
+  </div>
+  <div id="tsm-hint">
+    <kbd>Open hand</kbd> — grab &amp; rotate<br>
+    <kbd>Closed fist</kbd> — freeze in place<br>
+    <kbd>Two open hands</kbd> — orbit + spread/squeeze to zoom<br>
+    <kbd>Loose pinch</kbd> — hover-aim a node<br>
+    <kbd>Tight pinch</kbd> — open the aimed node
+  </div>
 </div>
 
 <script type="importmap">
@@ -1188,7 +1219,423 @@ function animate() {
 
 // fade loader once everything is queued
 setTimeout(()=>document.getElementById('loader').classList.add('done'), 350);
+
+// Expose hooks for Tony Stark Mode (hand tracking)
+window.__codex = { THREE, camera, controls, raycaster, pickables, mouse, openTarget,
+  cancelFly: () => { flyTarget = null; flyFrom = null; } };
+
 animate();
+</script>
+
+<!-- ============================================================
+     TONY STARK MODE — MediaPipe hand tracking → camera control
+     ============================================================ -->
+<script type="module">
+import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
+
+const video = document.getElementById('tsm-video');
+const canvas = document.getElementById('tsm-canvas');
+const ctx = canvas.getContext('2d');
+const stateEl = document.getElementById('tsm-state');
+const modeEl  = document.getElementById('tsm-mode');
+const camSelect = document.getElementById('tsm-camera');
+const toggleBtn = document.getElementById('tsm-toggle');
+const panel = document.getElementById('tsm-panel');
+
+let landmarker = null;
+let active = false;
+let raf = null;
+
+const CONNECTIONS = [
+  [0,1],[1,2],[2,3],[3,4],
+  [0,5],[5,6],[6,7],[7,8],
+  [5,9],[9,10],[10,11],[11,12],
+  [9,13],[13,14],[14,15],[15,16],
+  [13,17],[17,18],[18,19],[19,20],[0,17]
+];
+// Three-zone pinch:
+//   > HOVER_PINCH        = open hand → orbit
+//   HOVER_PINCH..TIGHT   = hover-aim (raycast at fingertip midpoint, no orbit)
+//   < TIGHT_PINCH        = confirm; if a node is being hovered, open it
+const HOVER_PINCH = 0.10;
+const TIGHT_PINCH = 0.038;
+const HOVER_DWELL_MS = 180;   // must hover this long before tight-pinch fires
+const PINCH_THRESHOLD = HOVER_PINCH;  // for skeleton color only
+
+async function initLandmarker() {
+  setState('Loading model…');
+  const fileset = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+  );
+  try {
+    landmarker = await HandLandmarker.createFromOptions(fileset, {
+      baseOptions: {
+        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+        delegate: "GPU"
+      },
+      numHands: 2,
+      minHandDetectionConfidence: 0.4,
+      minHandPresenceConfidence: 0.4,
+      minTrackingConfidence: 0.4,
+      runningMode: "VIDEO"
+    });
+  } catch (e) {
+    console.warn('GPU delegate failed, falling back to CPU', e);
+    landmarker = await HandLandmarker.createFromOptions(fileset, {
+      baseOptions: {
+        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+        delegate: "CPU"
+      },
+      numHands: 2,
+      minHandDetectionConfidence: 0.4,
+      minHandPresenceConfidence: 0.4,
+      minTrackingConfidence: 0.4,
+      runningMode: "VIDEO"
+    });
+  }
+}
+
+async function listCameras() {
+  const devs = await navigator.mediaDevices.enumerateDevices();
+  const cams = devs.filter(d => d.kind === 'videoinput');
+  camSelect.innerHTML = cams.map(c => `<option value="${c.deviceId}">${c.label || 'Camera ' + c.deviceId.slice(0,6)}</option>`).join('');
+  const iphone = cams.find(c => /iphone/i.test(c.label));
+  if (iphone) camSelect.value = iphone.deviceId;
+}
+
+async function startCamera() {
+  const constraints = {
+    video: {
+      deviceId: camSelect.value ? { exact: camSelect.value } : undefined,
+      width: { ideal: 1280 }, height: { ideal: 720 }
+    },
+    audio: false
+  };
+  setState('Connecting…');
+  console.log('[TSM] getUserMedia with', constraints);
+  const stream = await navigator.mediaDevices.getUserMedia(constraints);
+  const track = stream.getVideoTracks()[0];
+  console.log('[TSM] got track:', track.label, track.getSettings());
+  video.srcObject = stream;
+  if (video.readyState < 2) {
+    await new Promise(r => video.addEventListener('loadeddata', r, { once: true }));
+  }
+  await video.play();
+  let waited = 0;
+  while (video.videoWidth === 0 && waited < 4000) {
+    await new Promise(r => setTimeout(r, 150));
+    waited += 150;
+  }
+  if (video.videoWidth === 0) {
+    throw new Error('No frames from camera. If using iPhone Continuity, unlock the phone and bring it near the Mac.');
+  }
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  console.log('[TSM] video size:', video.videoWidth, 'x', video.videoHeight);
+}
+
+function stopCamera() {
+  if (video.srcObject) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+  }
+}
+
+function setState(s){ stateEl.textContent = s; }
+function setMode(s){ modeEl.textContent = s; }
+
+// ---- Gesture state ----
+let orbit = null;        // {handX, handY, theta, phi, radius}
+let twoHand = null;      // {sep0, radius0}
+let hoverState = null;   // {data, mesh, sinceMs, fired, midX, midY}
+
+// ---- Inertia / smoothing ----
+// Low-pass filter on landmark positions so detection jitter doesn't flicker.
+// alpha = blend factor toward new sample. Lower = more inertia, more lag.
+const SMOOTH_ALPHA = 0.45;
+let smoothedHands = [];
+
+function smoothHands(rawHands) {
+  if (rawHands.length === 0) { smoothedHands = []; return []; }
+  const used = new Array(smoothedHands.length).fill(false);
+  const out = [];
+  for (let i = 0; i < rawHands.length; i++) {
+    const raw = rawHands[i];
+    const rc = handCenter(raw);
+    let bestIdx = -1, bestDist = Infinity;
+    for (let j = 0; j < smoothedHands.length; j++) {
+      if (used[j]) continue;
+      const pc = handCenter(smoothedHands[j]);
+      const d = Math.hypot(rc.x - pc.x, rc.y - pc.y);
+      if (d < bestDist) { bestDist = d; bestIdx = j; }
+    }
+    if (bestIdx >= 0 && bestDist < 0.18) {
+      used[bestIdx] = true;
+      const prev = smoothedHands[bestIdx];
+      out.push(raw.map((p, k) => ({
+        x: prev[k].x + (p.x - prev[k].x) * SMOOTH_ALPHA,
+        y: prev[k].y + (p.y - prev[k].y) * SMOOTH_ALPHA,
+        z: prev[k].z + (p.z - prev[k].z) * SMOOTH_ALPHA
+      })));
+    } else {
+      out.push(raw.map(p => ({ x: p.x, y: p.y, z: p.z })));
+    }
+  }
+  smoothedHands = out;
+  return out;
+}
+
+function pinchDist(lm) {
+  const a = lm[4], b = lm[8];
+  return Math.hypot(a.x-b.x, a.y-b.y, a.z-b.z);
+}
+function handCenter(lm) {
+  return { x: (lm[0].x + lm[9].x) / 2, y: (lm[0].y + lm[9].y) / 2 };
+}
+// Open palm vs closed fist: ratio of fingertip→wrist distance over wrist→middle-MCP.
+// Open hand → tips far from wrist (~2x). Closed fist → tips near wrist (<1.3x).
+function isOpenHand(lm) {
+  const w = lm[0], mcp = lm[9];
+  const handSize = Math.hypot(w.x - mcp.x, w.y - mcp.y);
+  if (handSize < 0.001) return true;
+  let avg = 0;
+  for (const i of [8, 12, 16, 20]) {
+    avg += Math.hypot(lm[i].x - w.x, lm[i].y - w.y);
+  }
+  avg /= 4;
+  return (avg / handSize) > 1.55;
+}
+
+function loop() {
+  raf = requestAnimationFrame(loop);
+  if (!landmarker || video.readyState < 2) return;
+
+  const result = landmarker.detectForVideo(video, performance.now());
+
+  // draw preview
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const raw = (result && result.landmarks) ? result.landmarks : [];
+  const hands = smoothHands(raw);
+  for (const lm of hands) drawHand(lm);
+
+  applyGestures(hands);
+}
+
+function drawHand(lm) {
+  const w = canvas.width, h = canvas.height;
+  const pinching = pinchDist(lm) < PINCH_THRESHOLD;
+  const open = isOpenHand(lm);
+  ctx.strokeStyle = pinching ? '#ffaa40' : (open ? '#5fb8d8' : '#ff6677');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (const [a,b] of CONNECTIONS) {
+    ctx.moveTo(lm[a].x*w, lm[a].y*h);
+    ctx.lineTo(lm[b].x*w, lm[b].y*h);
+  }
+  ctx.stroke();
+  ctx.fillStyle = pinching ? '#ffd27a' : '#a8e6ff';
+  for (const p of lm) {
+    ctx.beginPath();
+    ctx.arc(p.x*w, p.y*h, 2.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+  if (pinching) {
+    const mx = (lm[4].x + lm[8].x)/2 * w;
+    const my = (lm[4].y + lm[8].y)/2 * h;
+    ctx.strokeStyle = '#ffaa40'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(mx, my, 14, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,170,80,.4)';
+    ctx.beginPath(); ctx.arc(mx, my, 14, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+function applyGestures(hands) {
+  const codex = window.__codex;
+  if (!codex) return;
+  const { THREE, camera, controls, cancelFly } = codex;
+
+  setState(`Live · ${hands.length} hand${hands.length === 1 ? '' : 's'}`);
+
+  if (hands.length === 0) {
+    orbit = null; twoHand = null; hoverState = null;
+    setMode('');
+    return;
+  }
+
+  // Only OPEN hands drive control. Closed fist = freeze.
+  const openHands = hands.filter(isOpenHand);
+
+  if (openHands.length === 0) {
+    // Freeze: clear snapshots so reopen re-grabs from the new hand position
+    orbit = null; twoHand = null; hoverState = null;
+    setMode('frozen');
+    return;
+  }
+
+  // ----- ONE open hand: three-zone control -----
+  if (openHands.length === 1) {
+    twoHand = null;
+    const lm = openHands[0];
+    const c = handCenter(lm);
+    const pd = pinchDist(lm);
+    const midX = (lm[4].x + lm[8].x) / 2;
+    const midY = (lm[4].y + lm[8].y) / 2;
+
+    // ZONE 3: tight pinch — confirm hover target, otherwise no-op
+    if (pd < TIGHT_PINCH) {
+      orbit = null;
+      if (hoverState && hoverState.data && !hoverState.fired
+          && (performance.now() - hoverState.sinceMs) >= HOVER_DWELL_MS) {
+        codex.openTarget(hoverState.data);
+        hoverState.fired = true;
+        setMode('open ✓');
+      } else {
+        setMode(hoverState ? 'pinch…' : 'pinch (no aim)');
+      }
+      return;
+    }
+
+    // ZONE 2: loose pinch — hover-aim
+    if (pd < HOVER_PINCH) {
+      orbit = null;
+      // Mirror x because preview is mirrored (user's POV)
+      const ndcX = 1 - 2 * midX;
+      const ndcY = 1 - 2 * midY;
+      codex.mouse.x = ndcX;
+      codex.mouse.y = ndcY;
+      const m = new THREE.Vector2(ndcX, ndcY);
+      codex.raycaster.setFromCamera(m, camera);
+      const hits = codex.raycaster.intersectObjects(codex.pickables, false);
+      if (hits.length) {
+        const hit = hits[0];
+        if (!hoverState || hoverState.mesh !== hit.object) {
+          hoverState = {
+            data: hit.object.userData,
+            mesh: hit.object,
+            sinceMs: performance.now(),
+            fired: false,
+            midX, midY
+          };
+        } else {
+          hoverState.midX = midX;
+          hoverState.midY = midY;
+        }
+        setMode('aim · ready');
+      } else {
+        hoverState = null;
+        setMode('aim');
+      }
+      return;
+    }
+
+    // ZONE 1: open hand far from pinch — orbit
+    hoverState = null;
+    cancelFly();
+    if (!orbit) {
+      const offset = camera.position.clone().sub(controls.target);
+      const sph = new THREE.Spherical().setFromVector3(offset);
+      orbit = { handX: c.x, handY: c.y, theta: sph.theta, phi: sph.phi, radius: sph.radius };
+    } else {
+      const dx = c.x - orbit.handX;
+      const dy = c.y - orbit.handY;
+      const offset = camera.position.clone().sub(controls.target);
+      const sph = new THREE.Spherical().setFromVector3(offset);
+      sph.theta = orbit.theta + dx * Math.PI * 2.2;
+      sph.phi  = THREE.MathUtils.clamp(orbit.phi - dy * Math.PI * 1.4, 0.08, Math.PI - 0.08);
+      sph.radius = orbit.radius;
+      offset.setFromSpherical(sph);
+      camera.position.copy(controls.target).add(offset);
+    }
+    setMode('orbit');
+    return;
+  }
+
+  // ----- TWO open hands: orbit by centroid, zoom by separation -----
+  hoverState = null;
+  cancelFly();
+  const c0 = handCenter(openHands[0]);
+  const c1 = handCenter(openHands[1]);
+  const cx = (c0.x + c1.x) / 2;
+  const cy = (c0.y + c1.y) / 2;
+  const sep = Math.hypot(c0.x - c1.x, c0.y - c1.y);
+
+  if (!orbit || !twoHand) {
+    const offset = camera.position.clone().sub(controls.target);
+    const sph = new THREE.Spherical().setFromVector3(offset);
+    orbit = { handX: cx, handY: cy, theta: sph.theta, phi: sph.phi, radius: sph.radius };
+    twoHand = { sep0: sep, radius0: sph.radius };
+  } else {
+    const dx = cx - orbit.handX;
+    const dy = cy - orbit.handY;
+    const offset = camera.position.clone().sub(controls.target);
+    const sph = new THREE.Spherical().setFromVector3(offset);
+    sph.theta = orbit.theta + dx * Math.PI * 2.2;
+    sph.phi  = THREE.MathUtils.clamp(orbit.phi - dy * Math.PI * 1.4, 0.08, Math.PI - 0.08);
+    const ratio = twoHand.sep0 / Math.max(0.02, sep);
+    sph.radius = THREE.MathUtils.clamp(twoHand.radius0 * ratio, controls.minDistance, controls.maxDistance);
+    offset.setFromSpherical(sph);
+    camera.position.copy(controls.target).add(offset);
+  }
+  setMode('orbit + zoom');
+}
+
+toggleBtn.addEventListener('click', async () => {
+  if (active) {
+    active = false;
+    toggleBtn.classList.remove('active');
+    panel.classList.remove('visible');
+    setState('Off'); setMode('');
+    if (raf) cancelAnimationFrame(raf);
+    stopCamera();
+    return;
+  }
+  try {
+    panel.classList.add('visible');
+    setState('Requesting camera…');
+    // Initial permission grant so labels populate
+    const tmp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    tmp.getTracks().forEach(t => t.stop());
+    await listCameras();
+    if (!landmarker) await initLandmarker();
+    setState('Starting…');
+    await startCamera();
+    active = true;
+    toggleBtn.classList.add('active');
+    setState('Live');
+    loop();
+  } catch (e) {
+    console.error(e);
+    setState('Error: ' + e.message);
+  }
+});
+
+camSelect.addEventListener('change', async () => {
+  if (!active) return;
+  try {
+    setState('Switching…');
+    stopCamera();
+    await startCamera();
+    setState('Live');
+  } catch (e) {
+    console.error(e);
+    setState('Error: ' + e.message);
+  }
+});
+
+document.getElementById('tsm-refresh').addEventListener('click', async () => {
+  try {
+    // A short permission ping forces macOS to re-evaluate Continuity Camera
+    const tmp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    tmp.getTracks().forEach(t => t.stop());
+    await listCameras();
+    setState('Cameras refreshed');
+  } catch (e) {
+    setState('Error: ' + e.message);
+  }
+});
 </script>
 </body>
 </html>
