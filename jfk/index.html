@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JFK · A Life in Time</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #07080c;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    color: #fff;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Cosmic backdrop */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 30%, rgba(50, 80, 170, 0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 45% at 50% 75%, rgba(170, 30, 50, 0.32) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 70% at 50% 50%, rgba(15, 8, 30, 0.6) 0%, #07080c 80%);
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1px 1px at 78% 84%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 38% 64%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 88% 28%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 18% 78%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 58% 14%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1px 1px at 92% 58%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 28% 92%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 4% 48%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 96% 90%, rgba(255,255,255,0.5), transparent);
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Top-left brand */
+  .brand {
+    position: fixed;
+    top: 28px; left: 36px;
+    font-family: "Times New Roman", serif;
+    font-weight: 300;
+    letter-spacing: 0.4em;
+    font-size: 18px;
+    color: rgba(255,255,255,0.75);
+    z-index: 100;
+  }
+  .brand small {
+    display: block;
+    font-family: -apple-system, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    margin-top: 4px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* Year readout, floating top-right */
+  .year-readout {
+    position: fixed;
+    top: 28px; right: 36px;
+    text-align: right;
+    z-index: 100;
+    color: rgba(255,255,255,0.9);
+  }
+  .year-readout .yr {
+    font-family: "Times New Roman", serif;
+    font-size: 84px;
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    transition: opacity 0.2s;
+  }
+  .year-readout .place {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-top: 6px;
+  }
+
+  /* Stage */
+  .stage {
+    position: fixed;
+    inset: 0;
+    perspective: 2400px;
+    perspective-origin: 50% 55%;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+  }
+  .deck {
+    position: relative;
+    width: min(1180px, 94vw);
+    aspect-ratio: 16 / 9;
+    transform-style: preserve-3d;
+  }
+
+  /* 16:9 card — sidebar (left) + photo (right) */
+  .card {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    background: #0d0d12;
+    box-shadow:
+      0 40px 100px rgba(0,0,0,0.7),
+      0 0 0 1px rgba(255,255,255,0.08) inset;
+    will-change: transform, opacity, filter;
+    transition:
+      transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1),
+      opacity 0.30s ease,
+      filter 0.30s ease;
+    backface-visibility: hidden;
+  }
+
+  /* Left sidebar — solid (no bleed-through), all written info */
+  .card .side {
+    width: 34%;
+    min-width: 280px;
+    padding: 38px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    background: #0a0a10;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    color: #fff;
+    overflow: hidden;
+  }
+  .card .side .index {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 18px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card .side .date {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(180, 200, 240, 0.85);
+    margin-bottom: 14px;
+  }
+  .card .side .title {
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #fff;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  .card .side .blurb {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.76);
+    margin-bottom: auto;
+  }
+  .card .side .place {
+    margin-top: 18px;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+  .card .side .weather {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.78);
+    line-height: 1.5;
+  }
+  .card .side .weather.has-data { display: block; }
+  .card .side .weather .wx-label {
+    font-size: 9px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.42);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card .side .weather .wx-label::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(140, 200, 255, 0.7);
+    box-shadow: 0 0 6px rgba(140, 200, 255, 0.6);
+  }
+  .card .side .weather .wx-data {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card .side .weather .wx-data b { font-weight: 600; color: #fff; }
+
+  /* Right photo region — full uncropped photo, with blurred copy filling dead space */
+  .card .photo {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #0d0d12;
+  }
+  .card .photo .photo-bg {
+    position: absolute;
+    inset: -60px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(48px) brightness(0.55) saturate(0.7);
+    transform: scale(1.1);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .card .photo .photo-bg.loaded { opacity: 1; }
+  .card .photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;        /* show entire image, never crop the subject */
+    object-position: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .card .photo img.loaded { opacity: 1; }
+  .card .photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      270deg,
+      rgba(0,0,0,0) 70%,
+      rgba(0,0,0,0.22) 100%
+    );
+  }
+
+  /* Right-edge timeline ticks */
+  .timeline {
+    position: fixed;
+    right: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 70vh;
+    width: 30px;
+    z-index: 100;
+    pointer-events: auto;
+  }
+  .timeline .tick {
+    position: absolute;
+    right: 0;
+    width: 8px;
+    height: 1px;
+    background: rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: width 0.18s ease, background 0.18s ease;
+  }
+  .timeline .tick:hover { width: 16px; background: rgba(255,255,255,0.85); }
+  .timeline .tick.active { width: 22px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.6); }
+  .timeline .tick.major { width: 14px; background: rgba(255,255,255,0.7); }
+  .timeline .tick-cap {
+    position: absolute;
+    right: 0;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+  }
+  .timeline .tick-cap.top { top: -22px; }
+  .timeline .tick-cap.bot { bottom: -22px; }
+
+  /* Bottom hint pill */
+  .hint {
+    position: fixed;
+    bottom: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    display: flex; gap: 14px; align-items: center;
+  }
+  .hint .dot { width: 4px; height: 4px; background: rgba(255,255,255,0.4); border-radius: 50%; }
+
+  /* Progress bar at bottom */
+  .progress {
+    position: fixed;
+    left: 0; right: 0;
+    bottom: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.05);
+    z-index: 90;
+  }
+  .progress .fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(120,160,255,0.7), rgba(255,180,180,0.7));
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+</style>
+</head>
+<body>
+
+<div class="brand">JFK<small>A LIFE IN TIME</small></div>
+
+<div class="year-readout">
+  <div class="yr" id="year">1917</div>
+  <div class="place" id="place">Brookline, MA</div>
+</div>
+
+<div class="stage">
+  <div class="deck" id="deck"></div>
+</div>
+
+<div class="timeline" id="timeline">
+  <div class="tick-cap top">1917</div>
+  <div class="tick-cap bot">1963</div>
+</div>
+
+<div class="hint">
+  <span>SCROLL</span>
+  <span class="dot"></span>
+  <span>SWIPE</span>
+  <span class="dot"></span>
+  <span>↑ ↓</span>
+</div>
+
+<div class="progress"><div class="fill" id="progress"></div></div>
+
+<script>
+/* Each card = one moment. Photo = gradient + glyph (stand-in for archival imagery).
+   Ordered chronologically from earliest (back of stack) to latest (front, "now"). */
+const EVENTS = [
+  { year:"1917", date:"May 29, 1917", place:"Brookline, MA",
+    title:"Born at 83 Beals Street",
+    blurb:"3:00 PM. Second of nine children to Joseph Sr. and Rose Fitzgerald, in a corner Colonial outside Boston.",
+    bg:"linear-gradient(160deg,#3a4a5a,#1a242e 60%,#080d12)", glyph:"👶" },
+
+  { year:"1920", date:"Winter 1920", place:"Brookline, MA",
+    title:"Scarlet fever — first brush with mortality",
+    blurb:"Two-year-old Jack contracts scarlet fever; spends two months in isolation at Boston City Hospital.",
+    bg:"linear-gradient(160deg,#5a2a2a,#2a1010 60%,#0e0606)", glyph:"🩺" },
+
+  { year:"1927", date:"Sept 1927", place:"Riverdale, NY",
+    title:"Family flees Boston's Irish prejudice",
+    blurb:"Joe Sr. relocates the Kennedys to a 21-room mansion. Jack enters Riverdale Country School.",
+    bg:"linear-gradient(160deg,#3a5240,#1a2a1f 60%,#080f0a)", glyph:"🏡" },
+
+  { year:"1931", date:"Sept 1931", place:"Wallingford, CT",
+    title:"Choate Rosemary Hall",
+    blurb:"Forms the 'Muckers Club' — a 13-boy clique that mocks the headmaster. Nearly expelled. Voted 'Most Likely to Succeed.'",
+    bg:"linear-gradient(160deg,#4a3e26,#241c10 60%,#0c0905)", glyph:"🎓" },
+
+  { year:"1936", date:"Sept 1936", place:"Cambridge, MA",
+    title:"Enters Harvard College",
+    blurb:"Class of 1940. Lives in Weld, then Winthrop. Studies Government. Plays JV football until back injury.",
+    bg:"linear-gradient(160deg,#7a1a1d,#3e0e10 60%,#180506)", glyph:"📚" },
+
+  { year:"1938", date:"1938-39", place:"London, England",
+    title:"Father appointed Ambassador to the Court of St. James's",
+    blurb:"Jack takes leave from Harvard to work at the embassy. Witnesses Munich, Hitler's rise. Tours occupied Czechoslovakia.",
+    bg:"linear-gradient(160deg,#3c3b6e,#1a1a3a 60%,#080813)", glyph:"🇬🇧" },
+
+  { year:"1940", date:"July 1940", place:"New York, NY",
+    title:"'Why England Slept' becomes a bestseller",
+    blurb:"His Harvard senior thesis on appeasement, polished with help from Arthur Krock, sells 80,000 copies.",
+    bg:"linear-gradient(160deg,#5a4a2a,#2a2210 60%,#0c0905)", glyph:"📕" },
+
+  { year:"1941", date:"Sept 1941", place:"Washington, D.C.",
+    title:"Commissioned U.S. Naval Reserve",
+    blurb:"After Army rejection for back issues, Joe Sr. pulls strings. Posted to Office of Naval Intelligence.",
+    bg:"linear-gradient(160deg,#1a2c44,#0a131e 60%,#04080d)", glyph:"⚓" },
+
+  { year:"1943", date:"Aug 2, 1943", place:"Blackett Strait, Solomon Islands",
+    title:"PT-109 sliced in half by Japanese destroyer",
+    blurb:"2 dead. Lt. Kennedy tows a wounded crewman 3.5 miles by clenching a life-vest strap in his teeth. Carves SOS into a coconut husk.",
+    bg:"linear-gradient(160deg,#0a1c2e,#04101c 60%,#020608)", glyph:"⛴" },
+
+  { year:"1944", date:"Aug 12, 1944", place:"Suffolk, England",
+    title:"Brother Joe Jr. killed on a drone bomber mission",
+    blurb:"Operation Aphrodite. The plane explodes over Blytheburgh; no remains recovered. The family's political ambitions shift to Jack.",
+    bg:"linear-gradient(160deg,#2a2238,#13101e 60%,#070510)", glyph:"⚱️" },
+
+  { year:"1945", date:"April 1945", place:"Berlin, Germany",
+    title:"Hearst correspondent in war's last weeks",
+    blurb:"Walks through Hitler's bombed-out Reich Chancellery. Covers the UN founding in San Francisco and the British election.",
+    bg:"linear-gradient(160deg,#3c2a20,#1a120a 60%,#0a0604)", glyph:"📰" },
+
+  { year:"1946", date:"Nov 5, 1946", place:"Boston, MA",
+    title:"Elected to U.S. House — 11th District",
+    blurb:"Wins his grandfather Honey Fitz's old seat with 73%. Sworn in alongside freshman Richard Nixon.",
+    bg:"linear-gradient(160deg,#3c3b6e,#1a193a 60%,#080813)", glyph:"🏛" },
+
+  { year:"1947", date:"Sept 21, 1947", place:"London Clinic",
+    title:"Diagnosed with Addison's disease",
+    blurb:"Sir Daniel Davis: 'That young American friend of yours hasn't a year to live.' Receives last rites aboard Queen Mary.",
+    bg:"linear-gradient(160deg,#5a2a2a,#251010 60%,#0e0606)", glyph:"💊" },
+
+  { year:"1952", date:"Nov 4, 1952", place:"Boston, MA",
+    title:"Elected U.S. Senator from Massachusetts",
+    blurb:"Defeats incumbent Henry Cabot Lodge Jr. by 70,000 votes. Bobby — fresh out of UVA Law — manages the campaign.",
+    bg:"linear-gradient(160deg,#1a3260,#0c1a32 60%,#060c18)", glyph:"🗳" },
+
+  { year:"1953", date:"Sept 12, 1953", place:"Newport, RI",
+    title:"Marries Jacqueline Bouvier",
+    blurb:"St. Mary's Church. 800 guests, 3,000 onlookers. Cardinal Cushing officiates with a blessing from Pope Pius XII.",
+    bg:"linear-gradient(160deg,#7a5e3a,#3a2c18 60%,#181008)", glyph:"💍" },
+
+  { year:"1954", date:"Oct 21, 1954", place:"New York, NY",
+    title:"Spinal fusion — Last Rites again",
+    blurb:"Hospital for Special Surgery. Falls into a coma after staph infection. Begins drafting 'Profiles in Courage' from his hospital bed.",
+    bg:"linear-gradient(160deg,#3a4a5a,#1a242e 60%,#080d12)", glyph:"🩻" },
+
+  { year:"1957", date:"May 6, 1957", place:"New York, NY",
+    title:"Pulitzer Prize for 'Profiles in Courage'",
+    blurb:"Eight senators who defied their parties. Ted Sorensen later acknowledges 'a substantial role' in the first draft.",
+    bg:"linear-gradient(160deg,#7a5e26,#3a2c10 60%,#181005)", glyph:"🏆" },
+
+  { year:"1957", date:"Nov 27, 1957", place:"New York, NY",
+    title:"Daughter Caroline born",
+    blurb:"After three pregnancy losses. Christened at St. Patrick's Cathedral. The first relief in years for Jack and Jackie.",
+    bg:"linear-gradient(160deg,#52385a,#26182a 60%,#0e070f)", glyph:"👶" },
+
+  { year:"1960", date:"Jan 2, 1960", place:"Washington, D.C.",
+    title:"Announces candidacy for President",
+    blurb:"Senate Caucus Room. Critics call him too young, too inexperienced, too Catholic. The Convair 'Caroline' becomes his weapon.",
+    bg:"linear-gradient(160deg,#3c3b6e,#1a193a 60%,#080813)", glyph:"🎙" },
+
+  { year:"1960", date:"May 10, 1960", place:"Charleston, WV",
+    title:"Wins West Virginia primary",
+    blurb:"61% in a 95% Protestant state. Kills the 'Catholics can't win Protestant America' argument. Humphrey withdraws that night.",
+    bg:"linear-gradient(160deg,#3a4a3a,#1a221a 60%,#0a0e0a)", glyph:"⛏" },
+
+  { year:"1960", date:"Sept 26, 1960", place:"Chicago, IL",
+    title:"First televised presidential debate",
+    blurb:"70 million viewers. Nixon — pale, sweaty, no makeup — looks ill. Kennedy looks presidential. The visual era of politics begins.",
+    bg:"linear-gradient(160deg,#161618,#0a0a0c 60%,#040405)", glyph:"📺" },
+
+  { year:"1960", date:"Nov 8, 1960", place:"Hyannis Port, MA",
+    title:"Elected 35th President of the United States",
+    blurb:"303 electoral votes. 112,827-vote popular margin — the closest since 1880. Youngest elected president, first Catholic.",
+    bg:"linear-gradient(160deg,#7a1a1d,#3e0e10 60%,#160506)", glyph:"🇺🇸" },
+
+  { year:"1960", date:"Nov 25, 1960", place:"Washington, D.C.",
+    title:"Son John F. Kennedy Jr. born",
+    blurb:"17 days after the election. Jackie rushed to Georgetown by ambulance. Caroline calls him 'John-John.' The nickname sticks.",
+    bg:"linear-gradient(160deg,#1a3c5a,#0c1c2c 60%,#060d14)", glyph:"🍼" },
+
+  { year:"1961", date:"Jan 20, 1961", place:"Washington, D.C.",
+    title:"'Ask not what your country can do for you'",
+    blurb:"22°F, fresh snow on the Capitol steps. Robert Frost recites from memory. The 13-minute address is among the shortest, most quoted in history.",
+    bg:"linear-gradient(160deg,#dde6ee,#7a8a98 60%,#3a4450)", glyph:"❄️" },
+
+  { year:"1961", date:"Apr 17, 1961", place:"Bay of Pigs, Cuba",
+    title:"Bay of Pigs invasion fails in 72 hours",
+    blurb:"Brigade 2506 routed. 1,189 captured. JFK takes full responsibility. Approval jumps to 83%. He never trusts the CIA the same way again.",
+    bg:"linear-gradient(160deg,#1a3a2a,#08180e 60%,#040b06)", glyph:"🛥" },
+
+  { year:"1961", date:"May 25, 1961", place:"Washington, D.C.",
+    title:"'…land a man on the Moon and return him safely'",
+    blurb:"Joint session of Congress. Shaken by Gagarin's orbit and the Bay of Pigs, JFK commits to the Moon by decade's end.",
+    bg:"linear-gradient(160deg,#0a0a14,#040408 60%,#020204)", glyph:"🌙" },
+
+  { year:"1961", date:"June 4, 1961", place:"Vienna, Austria",
+    title:"Vienna Summit with Khrushchev",
+    blurb:"'He just beat the hell out of me.' Khrushchev presents a Berlin ultimatum. The Wall goes up two months later.",
+    bg:"linear-gradient(160deg,#3a4a5a,#1a242e 60%,#080d12)", glyph:"🤝" },
+
+  { year:"1961", date:"Aug 13, 1961", place:"Berlin",
+    title:"Berlin Wall built overnight",
+    blurb:"96 miles of barbed wire and concrete divide the city. JFK privately: 'A wall is a hell of a lot better than a war.'",
+    bg:"linear-gradient(160deg,#3c2a20,#180f0a 60%,#0a0604)", glyph:"🧱" },
+
+  { year:"1962", date:"Feb 20, 1962", place:"Cape Canaveral, FL",
+    title:"John Glenn orbits Earth on Friendship 7",
+    blurb:"First American in orbit. 3 orbits in 4h 55m. Cronkite cries on air at splashdown. Apollo gets its political momentum.",
+    bg:"linear-gradient(160deg,#1a2238,#0c1018 60%,#06080d)", glyph:"🚀" },
+
+  { year:"1962", date:"Sept 30, 1962", place:"Oxford, MS",
+    title:"Federal troops enroll James Meredith at Ole Miss",
+    blurb:"31,000 troops mobilized. Two killed in the campus riot. Meredith attends his first class the next morning.",
+    bg:"linear-gradient(160deg,#5a3a2a,#241712 60%,#0c0805)", glyph:"🪖" },
+
+  { year:"1962", date:"Oct 16-28, 1962", place:"Caribbean",
+    title:"Cuban Missile Crisis — 13 Days",
+    blurb:"U-2 photos reveal Soviet missiles in Cuba. JFK rejects the Joint Chiefs' demand for air strikes. A secret Jupiter-Turkey trade ends the standoff. Closest humanity has come to nuclear war.",
+    bg:"linear-gradient(160deg,#1a1a2a,#06060d 60%,#020205)", glyph:"☢️" },
+
+  { year:"1963", date:"June 10, 1963", place:"Washington, D.C.",
+    title:"American University 'Peace Speech'",
+    blurb:"'We all inhabit this small planet. We all breathe the same air.' Khrushchev calls it the greatest speech since FDR.",
+    bg:"linear-gradient(160deg,#3a5240,#1a2a1f 60%,#080f0a)", glyph:"🕊" },
+
+  { year:"1963", date:"June 11, 1963", place:"Washington, D.C.",
+    title:"Civil Rights Address from the Oval Office",
+    blurb:"Hours after Wallace's stand at the schoolhouse door. 'We are confronted primarily with a moral issue.' Sorensen finishes the draft minutes before air.",
+    bg:"linear-gradient(160deg,#7a1a1d,#3e0e10 60%,#180506)", glyph:"⚖️" },
+
+  { year:"1963", date:"June 26, 1963", place:"West Berlin",
+    title:"'Ich bin ein Berliner'",
+    blurb:"450,000 in Rathaus Schöneberg square. Aides say JFK considered it the rhetorical high point of his presidency.",
+    bg:"linear-gradient(160deg,#3c3b6e,#1a193a 60%,#080813)", glyph:"🏛" },
+
+  { year:"1963", date:"Aug 9, 1963", place:"Boston, MA",
+    title:"Son Patrick dies, age 39 hours",
+    blurb:"Born 5½ weeks premature with hyaline membrane disease. JFK is at his bedside. Friends say the loss draws Jack and Jackie closer than they had been in years.",
+    bg:"linear-gradient(160deg,#42374a,#180f1f 60%,#08050a)", glyph:"⚱️" },
+
+  { year:"1963", date:"Aug 28, 1963", place:"Washington, D.C.",
+    title:"March on Washington · 'I Have a Dream'",
+    blurb:"250,000 march on the Mall. JFK welcomes the Big Six to the Oval Office afterward: 'I have a dream,' he tells King with a smile.",
+    bg:"linear-gradient(160deg,#3a4a3a,#15211a 60%,#080d0a)", glyph:"🤝" },
+
+  { year:"1963", date:"Oct 7, 1963", place:"Washington, D.C.",
+    title:"Signs Limited Nuclear Test Ban Treaty",
+    blurb:"First arms-control treaty of the nuclear age. Senate ratifies 80-19. JFK calls it his proudest accomplishment.",
+    bg:"linear-gradient(160deg,#1a3260,#0c1a32 60%,#060c18)", glyph:"📜" },
+
+  { year:"1963", date:"Nov 22, 1963", place:"Dallas, TX",
+    title:"Assassinated in Dealey Plaza",
+    blurb:"12:30 PM CST. Three shots on Elm Street. Pronounced dead at Parkland at 1:00 PM. Age 46. LBJ sworn in aboard Air Force One at 2:38 PM, Jackie still in her bloodstained pink Chanel.",
+    bg:"linear-gradient(160deg,#5a1018,#280508 60%,#0e0204)", glyph:"🌹" },
+
+  { year:"1963", date:"Nov 25, 1963", place:"Arlington, VA",
+    title:"State funeral · John-John salutes the caisson",
+    blurb:"Watched by 175 million Americans. The eternal flame is lit at Arlington. John Jr. turns three the same day.",
+    bg:"linear-gradient(160deg,#1a1a24,#08080e 60%,#020204)", glyph:"🪦" },
+];
+
+/* ─── Meteostat integration ────────────────────────────────────────────────
+   Pulls daily station bulk CSVs (gzipped) from bulk.meteostat.net and
+   matches each event's ISO date. CORS-friendly. Pre-1936-ish dates and
+   remote stations (Solomons '43, Berlin '45) often have no data — those
+   cards simply omit the weather row. */
+
+const STATION_BY_PLACE = {
+  "Brookline, MA": "72509",          // Boston Logan
+  "Boston, MA": "72509",
+  "Hyannis Port, MA": "72509",
+  "Cambridge, MA": "72509",
+  "Newport, RI": "72508",            // Quonset / Providence
+  "New York, NY": "72503",           // LaGuardia
+  "Riverdale, NY": "72503",
+  "Wallingford, CT": "72504",        // Bradley
+  "London, England": "03772",        // Heathrow
+  "London Clinic": "03772",
+  "Suffolk, England": "03590",       // Wattisham
+  "Berlin, Germany": "10381",        // Berlin Tegel
+  "West Berlin": "10381",
+  "Washington, D.C.": "72405",       // Reagan National
+  "Arlington, VA": "72405",
+  "Charleston, WV": "72414",         // Yeager
+  "Chicago, IL": "72534",            // Midway
+  "Cape Canaveral, FL": "74794",     // Patrick AFB
+  "Dallas, TX": "72258",             // Love Field
+  "Oxford, MS": "72334",             // Memphis
+  "Bay of Pigs, Cuba": "78325",      // Havana José Martí
+  "Blackett Strait, Solomon Islands": "91517",  // Honiara Henderson
+  "Vienna, Austria": "11035",        // Schwechat
+  "Caribbean": "78325",              // map Missile Crisis to Havana
+};
+
+const MONTHS = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,June:5,Jul:6,July:6,
+  Aug:7,Sep:8,Sept:8,Oct:9,Nov:10,Dec:11,
+  January:0,February:1,March:2,April:3,August:7,September:8,October:9,November:10,December:11 };
+
+function parseISO(dateStr) {
+  // "May 29, 1917" / "Aug 2, 1943" / "Oct 16-28, 1962"
+  const m = dateStr.match(/^([A-Za-z]+)\s+(\d{1,2})(?:-\d+)?,\s*(\d{4})$/);
+  if (!m) return null;
+  const month = MONTHS[m[1]];
+  if (month == null) return null;
+  const d = parseInt(m[2], 10);
+  const y = parseInt(m[3], 10);
+  return `${y}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+const stationCache = {};        // stationId -> Map<isoDate, row[]> | null (failed)
+const inflight = {};            // stationId -> Promise
+
+async function loadStation(stationId) {
+  if (stationCache[stationId] !== undefined) return stationCache[stationId];
+  if (inflight[stationId]) return inflight[stationId];
+
+  inflight[stationId] = (async () => {
+    try {
+      // Pre-fetched Meteostat bulk CSVs served from same origin (./weather/)
+      const res = await fetch(`./weather/${stationId}.csv`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const map = new Map();
+      for (const line of text.split('\n')) {
+        if (!line) continue;
+        const cols = line.split(',');
+        // Meteostat daily: date,tavg,tmin,tmax,prcp,snow,wdir,wspd,wpgt,pres,tsun
+        if (/^\d{4}-\d{2}-\d{2}$/.test(cols[0])) map.set(cols[0], cols);
+      }
+      stationCache[stationId] = map;
+      return map;
+    } catch (e) {
+      console.warn('Meteostat load failed for', stationId, e.message);
+      stationCache[stationId] = null;
+      return null;
+    }
+  })();
+  return inflight[stationId];
+}
+
+async function fetchWeather(ev) {
+  const iso = parseISO(ev.date);
+  const station = STATION_BY_PLACE[ev.place];
+  if (!iso || !station) return null;
+  const map = await loadStation(station);
+  if (!map) return null;
+  const row = map.get(iso);
+  if (!row) return null;
+  // [date, tavg, tmin, tmax, prcp, snow, wdir, wspd, wpgt, pres, tsun]
+  const f = (i) => (row[i] === '' || row[i] == null) ? null : parseFloat(row[i]);
+  return {
+    iso, station,
+    tavg: f(1), tmin: f(2), tmax: f(3),
+    prcp: f(4), snow: f(5),
+    wdir: f(6), wspd: f(7),
+    pres: f(9), tsun: f(10),
+  };
+}
+
+function cToF(c) { return c == null ? null : Math.round(c * 9/5 + 32); }
+function mmToIn(mm) { return mm == null ? null : (mm / 25.4); }
+function kmhToMph(k) { return k == null ? null : Math.round(k * 0.621371); }
+
+function formatWeather(w) {
+  const parts = [];
+  if (w.tmax != null && w.tmin != null) {
+    parts.push(`<b>${cToF(w.tmax)}°</b>/<b>${cToF(w.tmin)}°F</b>`);
+  } else if (w.tavg != null) {
+    parts.push(`<b>${cToF(w.tavg)}°F</b>`);
+  }
+  if (w.snow != null && w.snow > 0) {
+    const inches = mmToIn(w.snow);
+    parts.push(`<b>${inches >= 1 ? Math.round(inches) : inches.toFixed(1)}"</b> snow`);
+  } else if (w.prcp != null && w.prcp > 0) {
+    const inches = mmToIn(w.prcp);
+    parts.push(`<b>${inches >= 1 ? inches.toFixed(1) : inches.toFixed(2)}"</b> rain`);
+  }
+  if (w.wspd != null && w.wspd > 0) {
+    parts.push(`<b>${kmhToMph(w.wspd)}</b> mph wind`);
+  }
+  if (w.pres != null) {
+    parts.push(`<b>${w.pres.toFixed(0)}</b> hPa`);
+  }
+  return parts.join(' · ');
+}
+
+const weatherLoaded = new Set();
+async function ensureWeather(idx) {
+  if (weatherLoaded.has(idx)) return;
+  weatherLoaded.add(idx);
+  const ev = EVENTS[idx];
+  const w = await fetchWeather(ev);
+  if (!w) return;
+  const card = cards[idx];
+  if (!card) return;
+  const slot = card.querySelector('[data-weather]');
+  if (!slot) return;
+  slot.classList.add('has-data');
+  slot.innerHTML = `
+    <div class="wx-label">Weather that day</div>
+    <div class="wx-data">${formatWeather(w)}</div>
+  `;
+}
+
+const deck = document.getElementById('deck');
+const yearEl = document.getElementById('year');
+const placeEl = document.getElementById('place');
+const progressEl = document.getElementById('progress');
+const timelineEl = document.getElementById('timeline');
+
+// Build cards
+EVENTS.forEach((ev, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.idx = i;
+  card.innerHTML = `
+    <aside class="side">
+      <div class="index">${String(i+1).padStart(2,'0')} / ${String(EVENTS.length).padStart(2,'0')}</div>
+      <div class="date">${ev.date}</div>
+      <div class="title">${ev.title}</div>
+      <div class="blurb">${ev.blurb}</div>
+      <div class="place">${ev.place}</div>
+      <div class="weather" data-weather></div>
+    </aside>
+    <div class="photo">
+      <div class="photo-bg" data-bg></div>
+      <img data-photo alt="" loading="lazy" />
+    </div>
+  `;
+  const img = card.querySelector('[data-photo]');
+  const bg = card.querySelector('[data-bg]');
+  const src = `./photos/${i}.jpg`;
+  img.addEventListener('load', () => {
+    img.classList.add('loaded');
+    bg.style.backgroundImage = `url("${src}")`;
+    bg.classList.add('loaded');
+  });
+  img.addEventListener('error', () => img.remove());
+  img.src = src;
+  deck.appendChild(card);
+});
+
+const cards = Array.from(deck.children);
+
+// Timeline ticks
+EVENTS.forEach((ev, i) => {
+  const t = document.createElement('div');
+  t.className = 'tick' + (i % 4 === 0 ? ' major' : '');
+  t.style.top = ((i / (EVENTS.length - 1)) * 100) + '%';
+  t.title = `${ev.date} — ${ev.title}`;
+  t.dataset.idx = i;
+  t.addEventListener('click', () => setTarget(i));
+  timelineEl.appendChild(t);
+});
+
+// SNAP-ONLY: target is always an integer. CSS transitions on .card animate
+// transform/opacity/filter between snapped states, so there is no "between"
+// resting state — every input lands on exactly one card.
+const N = EVENTS.length;
+let target = 0;
+
+const Z_SPACING = 240;       // px between stacked cards along z
+const Y_LIFT = 56;           // px each behind-card lifts up over the front
+const VISIBLE_BEHIND = 6;
+const VISIBLE_FRONT = 2;
+const BLUR_PER_STEP = 0.7;
+
+function setTarget(t) {
+  const clamped = Math.max(0, Math.min(N - 1, t | 0));
+  if (clamped === target) return;
+  target = clamped;
+  applyLayout();
+}
+
+function applyLayout() {
+  cards.forEach((card, i) => {
+    const offset = i - target;   // 0 = focused, >0 = behind (peeking up), <0 = past
+
+    let opacity, z, yShift, blur, zIndex, transition;
+
+    if (offset < 0) {
+      // Past the focus. Fade out FAST in place; do NOT translate forward
+      // (so it can never visually overlap the new front card).
+      opacity = 0;
+      z = 0;
+      yShift = 0;
+      blur = 0;
+      zIndex = 0;
+      transition = 'opacity 0.10s ease, transform 0.10s ease, filter 0.10s ease';
+    } else if (offset > VISIBLE_BEHIND) {
+      // Out of stack band — invisible, parked at the back.
+      opacity = 0;
+      z = -(VISIBLE_BEHIND + 1) * Z_SPACING;
+      yShift = -(VISIBLE_BEHIND + 1) * Y_LIFT;
+      blur = 5;
+      zIndex = 0;
+      transition = 'opacity 0.18s ease';
+    } else {
+      // In stack (0 .. VISIBLE_BEHIND): fully opaque, solid stack — no bleed.
+      opacity = 1;
+      z = -offset * Z_SPACING;
+      yShift = -offset * Y_LIFT;
+      blur = offset * BLUR_PER_STEP;
+      zIndex = 1000 - offset;
+      transition =
+        'transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1), ' +
+        'opacity 0.18s ease, filter 0.18s ease';
+    }
+
+    card.style.transition = transition;
+    card.style.transform = `translate3d(0, ${yShift}px, ${z}px)`;
+    card.style.opacity = String(opacity);
+    card.style.filter = blur ? `blur(${blur}px)` : 'none';
+    card.style.zIndex = String(zIndex);
+    card.style.pointerEvents = (offset === 0) ? 'auto' : 'none';
+  });
+
+  // Lazy-load weather for the focus + neighbors
+  ensureWeather(target);
+  if (target + 1 < N) ensureWeather(target + 1);
+  if (target - 1 >= 0) ensureWeather(target - 1);
+
+  // Readouts
+  const ev = EVENTS[target];
+  yearEl.textContent  = ev.year;
+  placeEl.textContent = ev.place;
+  progressEl.style.width = ((target / (N - 1)) * 100) + '%';
+
+  // Active tick
+  Array.from(timelineEl.querySelectorAll('.tick')).forEach((t, i) => {
+    t.classList.toggle('active', i === target);
+  });
+}
+
+// ── Wheel: standard throttled stepping. Each event steps one card, then a
+// short cooldown blocks subsequent events. This is the same pattern Apple
+// Photos / TikTok / most card carousels use — predictable, never silently
+// swallows a second gesture mid-momentum like a burst-lock approach can. ──
+const STEP_COOLDOWN_MS = 220;
+let lastStepAt = 0;
+window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const now = performance.now();
+  if (now - lastStepAt < STEP_COOLDOWN_MS) return;
+  if (Math.abs(e.deltaY) < 1) return;        // ignore noise events
+  setTarget(target + Math.sign(e.deltaY));
+  lastStepAt = now;
+}, { passive: false });
+
+// ── Touch: same throttle on swipe-end ──
+let touchStartY = null;
+window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+window.addEventListener('touchmove',  (e) => { if (touchStartY != null) e.preventDefault(); }, { passive: false });
+window.addEventListener('touchend',   (e) => {
+  if (touchStartY == null) return;
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  touchStartY = null;
+  if (Math.abs(dy) < 30) return;
+  const now = performance.now();
+  if (now - lastStepAt < STEP_COOLDOWN_MS) return;
+  setTarget(target + Math.sign(dy));
+  lastStepAt = now;
+}, { passive: true });
+
+// ── Keyboard ──
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === 'j') { setTarget(target + 1); e.preventDefault(); }
+  if (e.key === 'ArrowUp'   || e.key === 'PageUp'   || e.key === 'k') { setTarget(target - 1); e.preventDefault(); }
+  if (e.key === 'Home') setTarget(0);
+  if (e.key === 'End')  setTarget(N - 1);
+});
+
+applyLayout();
+</script>
+
+</body>
+</html>
